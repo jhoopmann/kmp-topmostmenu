@@ -2,9 +2,10 @@
 
 ## Introduction
 
-Uses kmp-compose-topmostwindow
+(UNDER DEVELOPMENT)
 
-@TODO
+Full customizable menu for in-app context or tray.
+Uses kmp-compose-topmostwindow.
 
 ![Menu on desktop space](/doc/img/desktop-space.png)
 ![Menu on foreign fullscreen spaces.](/doc/img/fullscreen-space.png)

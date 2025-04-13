@@ -4,7 +4,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import de.jhoopmann.topmostmenu.compose.ui.item.KeyEventMatcher
@@ -15,25 +14,8 @@ import de.jhoopmann.topmostwindow.awt.native.ApplicationHelper
 import kotlinx.coroutines.channels.Channel
 import java.awt.Point
 
-fun WindowState.copy(
-    position: WindowPosition = when (this.position) {
-        is WindowPosition.PlatformDefault -> WindowPosition.PlatformDefault
-        is WindowPosition.Aligned -> (this.position as WindowPosition.Aligned).copy()
-        is WindowPosition.Absolute -> (this.position as WindowPosition.Absolute).copy()
-    },
-    placement: WindowPlacement = this.placement,
-    size: DpSize = this.size.copy(),
-    isMinimized: Boolean = this.isMinimized
-): WindowState {
-    return WindowState(
-        position = position,
-        placement = placement,
-        size = size,
-        isMinimized = isMinimized
-    )
-}
-
 class MenuState(windowState: WindowState) {
+    private val processingState: MutableState<Boolean> = mutableStateOf(false)
     var windowState: WindowState by mutableStateOf(windowState)
     var visible: Boolean by mutableStateOf(false)
         private set
@@ -50,7 +32,6 @@ class MenuState(windowState: WindowState) {
         get() = initialized && children.all { it.treeInitialized }
     val treeFocused: Boolean
         get() = focused || children.any { it.treeFocused }
-    private val processingState: MutableState<Boolean> = mutableStateOf(false)
     var processing: Boolean
         get() = processingState.value || children.any { it.processing }
         set(value) {
@@ -85,9 +66,13 @@ class MenuState(windowState: WindowState) {
         }
     }
 
-    suspend fun open(windowState: WindowState = this.windowState) {
-        withFrameNanos { // set new windowState and wait for apply
-            this@MenuState.windowState = windowState
+    suspend fun open(
+        position: WindowPosition = windowState.position,
+        size: DpSize = windowState.size
+    ) {
+        withFrameNanos { // set position,size and wait for apply
+            windowState.position = position
+            windowState.size = size
         }
 
         if (platform == Platform.MacOS && !ApplicationHelper.instance.isActive()) {
@@ -104,7 +89,7 @@ class MenuState(windowState: WindowState) {
     }
 
     suspend fun close(
-        action: Boolean = false,
+        byAction: Boolean = false,
         except: MenuState? = null
     ) {
         closeChildren(except)
@@ -121,7 +106,7 @@ class MenuState(windowState: WindowState) {
             visible = false
         }
 
-        scope.onClosed?.invoke(action)
+        scope.onClosed?.invoke(byAction)
     }
 
     suspend fun closeChildren(except: MenuState? = null) {
@@ -131,15 +116,6 @@ class MenuState(windowState: WindowState) {
     }
 
     private fun treeHasChild(state: MenuState): Boolean {
-        return (children.firstOrNull { it == state } ?: children.firstOrNull {
-            it.treeHasChild(state)
-        }) != null
+        return (children.any { it == state } || children.any { it.treeHasChild(state) })
     }
-}
-
-val LocalMenuState: ProvidableCompositionLocal<MenuState?> = compositionLocalOf { null }
-
-@Composable
-fun ProvideMenuState(state: MenuState, content: @Composable () -> Unit) {
-    CompositionLocalProvider(LocalMenuState provides state, content)
 }

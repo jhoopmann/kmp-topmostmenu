@@ -73,7 +73,7 @@ fun SubMenu(
                 topState.closeChildren(currentState)
 
                 val position: WindowPosition = currentState.windowState.position.takeIf {
-                    state?.scope?.initialWindowState?.position is WindowPosition.Absolute
+                    state?.scope?.initialPosition is WindowPosition.Absolute
                 } ?: currentState.calculatePosition(
                     parentState,
                     menuItemCoordinates!!,
@@ -81,7 +81,7 @@ fun SubMenu(
                 ).run { WindowPosition.Absolute(x = x, y = y) }
 
                 val size: DpSize = currentState.windowState.size.takeIf {
-                    state?.scope?.initialWindowState?.size?.isSpecified ?: false
+                    state?.scope?.initialSize?.isSpecified ?: false
                 } ?: DpSize.Unspecified
 
                 currentState.open(

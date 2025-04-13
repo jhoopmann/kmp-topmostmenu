@@ -1,7 +1,5 @@
 package de.jhoopmann.topmostmenu.compose.ui.scope
 
-import androidx.compose.runtime.*
-
 class ItemScope(var list: Any? = null, var item: Any? = null) {
     inline fun <reified T> listAsOrNull(): T? = tryCast(list)
     inline fun <reified T> itemAsOrNull(): T? = tryCast(item)
@@ -13,11 +11,4 @@ class ItemScope(var list: Any? = null, var item: Any? = null) {
             null
         }
     }
-}
-
-val LocalItemScope: ProvidableCompositionLocal<ItemScope?> = compositionLocalOf { null }
-
-@Composable
-fun ProvideItemScope(scope: ItemScope?, content: @Composable () -> Unit) {
-    CompositionLocalProvider(LocalItemScope provides scope, content)
 }

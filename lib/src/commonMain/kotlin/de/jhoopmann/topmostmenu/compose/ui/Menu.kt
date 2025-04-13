@@ -5,6 +5,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.window.WindowDecoration
+import androidx.compose.ui.window.WindowPosition
 import de.jhoopmann.topmostmenu.compose.ui.scope.MenuScope
 import de.jhoopmann.topmostmenu.compose.ui.state.LocalMenuState
 import de.jhoopmann.topmostmenu.compose.ui.state.MenuState
@@ -34,7 +35,7 @@ fun Menu(
     val coroutineScope: CoroutineScope = rememberCoroutineScope()
     val parentState: MenuState? = LocalMenuState.current
     val topState: MenuState = parentState?.topState ?: state
-    val topMostOptions = remember { TopMostOptions() }
+    val topMostOptions: TopMostOptions = remember { TopMostOptions() }
 
     state.topState = topState
 
@@ -42,7 +43,12 @@ fun Menu(
         parentState?.children?.add(state)
 
         state.scope = MenuScope(
-            initialWindowState = state.windowState.copy(),
+            initialPosition = when (val position: WindowPosition = state.windowState.position) {
+                is WindowPosition.PlatformDefault -> position
+                is WindowPosition.Absolute -> position.copy()
+                is WindowPosition.Aligned -> position.copy()
+            },
+            initialSize = state.windowState.size.copy(),
             shape = shape,
             modifiers = modifiers,
             actionAutoClose = actionAutoClose,

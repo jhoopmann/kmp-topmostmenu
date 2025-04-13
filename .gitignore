@@ -1,0 +1,16 @@
+# Ignore Gradle project-specific cache directory
+**/.gradle
+**/.kotlin
+**/.idea
+
+
+# Ignore Gradle build output directory
+**/build
+
+# ignore native build
+lib/src/**/native/build
+
+#ignore junk
+**/.DS_Store
+**/test/*
+

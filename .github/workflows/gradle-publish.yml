@@ -1,0 +1,47 @@
+name: Publish to GitHub Packages
+
+on:
+    push:
+        branches:
+            - publish
+
+jobs:
+    platform_matrix:
+        strategy:
+            fail-fast: false
+            matrix:
+                system_image:
+                    - ubuntu-latest
+                    - windows-latest
+                    - macos-latest
+                include:
+                    - system_image: ubuntu-latest
+                      system_architecture: x64
+                      target_jvm_platform: linux
+                    - system_image: windows-latest
+                      system_architecture: x64
+                      target_jvm_platform: mingw
+                    - system_image: macos-latest
+                      system_architecture: aarch64
+                      target_jvm_platform: macos
+
+        runs-on: ${{ matrix.system_image }}
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup JDK
+              uses: actions/setup-java@v4
+              with:
+                  distribution: oracle
+                  java-version: "23"
+                  architecture: ${{ matrix.system_architecture }}
+
+            - name: Grant execute permission for Gradle
+              run: chmod +x gradlew
+
+            - name: Publish Package
+              run: ./gradlew publishTargetJvmPlatformPublicationToGithubKmpComposeTopMostMenuRepository -PtargetJvmPlatform=${{ matrix.target_jvm_platform }}
+              env:
+                  GITHUB_ACTOR: ${{ github.actor }}
+                  GITHUB_TOKEN: ${{ secrets.PUBLISHING_TOKEN }}

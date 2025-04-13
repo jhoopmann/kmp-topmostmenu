@@ -4,8 +4,8 @@
 
 (UNDER DEVELOPMENT)
 
-Full customizable menu for in-app context or tray.
-Uses kmp-compose-topmostwindow.
+Full customizable menu for usage as in-app context menu or tray icon for example.
+Uses kmp-compose-topmostwindow to be able to be displayed on foreign fullscreen spaces on macOS.
 
 ![Menu on desktop space](/doc/img/desktop-space.png)
 ![Menu on foreign fullscreen spaces.](/doc/img/fullscreen-space.png)

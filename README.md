@@ -95,7 +95,7 @@ Menu(
 }
 ```
 
-You can use BaseItem to implement whatever layout you want.
+You can use BaseItem to implement whatever layout you want, you can ignore the prepend / append and center methods.
 Example:
 ![Custom Icon Item Composable](/doc/img/custom-icon-item.png)
 

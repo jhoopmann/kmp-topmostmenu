@@ -84,12 +84,7 @@ fun SubMenu(
                     state?.scope?.initialSize?.isSpecified ?: false
                 } ?: DpSize.Unspecified
 
-                currentState.open(
-                    windowState = currentState.windowState.apply {
-                        this.position = position
-                        this.size = size
-                    }
-                )
+                currentState.open(position = position, size = size)
 
                 synchronized(topState) {
                     currentState.processing = false

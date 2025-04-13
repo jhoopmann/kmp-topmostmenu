@@ -2,7 +2,12 @@
 
 ## Introduction
 
+Uses kmp-compose-topmostwindow
+
 @TODO
+
+![Menu on desktop space](/doc/img/desktop-space.png)
+![Menu on foreign fullscreen spaces.](/doc/img/fullscreen-space.png)
 
 ## Compatibility
 

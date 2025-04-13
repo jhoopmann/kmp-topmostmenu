@@ -2,7 +2,7 @@
 
 ## Introduction
 
-(UNDER DEVELOPMENT, release expected to be ready at 20th April 2025)
+(UNDER DEVELOPMENT, release expected to be ready after 20th April 2025)
 
 Full customizable menu for usage as in-app context menu or tray icon for example.
 Uses kmp-compose-topmostwindow to be able to be displayed on foreign fullscreen spaces on macOS.

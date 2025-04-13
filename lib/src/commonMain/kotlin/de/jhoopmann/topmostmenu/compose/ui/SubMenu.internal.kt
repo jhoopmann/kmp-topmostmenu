@@ -4,6 +4,7 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.unit.*
 import de.jhoopmann.topmostmenu.compose.ui.state.MenuState
+import de.jhoopmann.topmostmenu.compose.ui.state.getPreferredRootSize
 
 internal fun MenuState.calculateItemScreenPosition(itemCoordinates: LayoutCoordinates, density: Density): DpOffset {
     return windowState.position.let { windowPosition ->
@@ -15,13 +16,6 @@ internal fun MenuState.calculateItemScreenPosition(itemCoordinates: LayoutCoordi
                 )
             }
         }
-    }
-}
-
-internal fun MenuState.getPreferredRootSize(): DpSize {
-    return with(window.contentPane) {
-        paint(graphics)
-        DpSize(preferredSize.width.dp, preferredSize.height.dp)
     }
 }
 

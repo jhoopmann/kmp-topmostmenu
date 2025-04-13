@@ -4,6 +4,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
+import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import de.jhoopmann.topmostmenu.compose.ui.item.KeyEventMatcher
@@ -11,10 +14,8 @@ import de.jhoopmann.topmostmenu.compose.ui.scope.MenuScope
 import de.jhoopmann.topmostmenu.native.Platform
 import de.jhoopmann.topmostmenu.native.platform
 import de.jhoopmann.topmostwindow.awt.native.ApplicationHelper
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
-import org.jetbrains.skiko.MainUIDispatcher
+import java.awt.Dimension
 import java.awt.Point
 
 class MenuState(windowState: WindowState) {
@@ -73,9 +74,24 @@ class MenuState(windowState: WindowState) {
         position: WindowPosition = windowState.position,
         size: DpSize = windowState.size
     ) {
-        withFrameNanos { // set position,size and wait for apply
-            windowState.position = position
-            windowState.size = size
+        withFrameNanos {
+            if (position.isSpecified && position != windowState.position) {
+                windowState.position = position
+                window.location =
+                    Point(position.x.value.toInt(), position.y.value.toInt())// set position,size and wait for apply
+            }
+
+            if (size.isSpecified && size != windowState.size) {
+                windowState.size = size
+                window.size = Dimension(size.width.value.toInt(), size.height.value.toInt())
+            } else if (size.isUnspecified) {
+                window.contentPane.size = getPreferredRootSize().run {
+                    Dimension(width.value.toInt(), height.value.toInt())
+                }
+                window.rootPane.size = window.contentPane.size
+                window.pack()
+                windowState.size = DpSize(window.preferredSize.width.dp, window.preferredSize.height.dp)
+            }
         }
 
         if (platform == Platform.MacOS && !ApplicationHelper.instance.isActive()) {

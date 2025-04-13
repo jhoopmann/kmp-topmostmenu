@@ -168,11 +168,15 @@ menuState.close()
 ```
 
 Internal usage UI safe (f.e. customized submenue opening/closing)
-
 ```
 menuState.eventQueue.trySend {
     if (!synchronized(menuState) { menuState.processing }) {
         menuState.close()
     }
 }
+```
+
+Pass AwtWindow onPreviewKey or onKey KeyEvents to menuState.handleKeyEvent for keyboard shortcuts 
+```
+menuState.handleKeyEvent(event: KeyEvent)
 ```

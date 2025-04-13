@@ -5,7 +5,7 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 
-fun WindowState.copy(
+internal fun WindowState.copy(
     position: WindowPosition = when (this.position) {
         is WindowPosition.PlatformDefault -> WindowPosition.PlatformDefault
         is WindowPosition.Aligned -> (this.position as WindowPosition.Aligned).copy()

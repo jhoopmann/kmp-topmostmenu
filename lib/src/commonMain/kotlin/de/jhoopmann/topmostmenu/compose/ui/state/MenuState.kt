@@ -71,8 +71,7 @@ class MenuState(windowState: WindowState) {
         size: DpSize = windowState.size
     ) {
         withFrameNanos { // set position,size and wait for apply
-            windowState.position = position
-            windowState.size = size
+            windowState = windowState.copy(position = position, size = size)
         }
 
         if (platform == Platform.MacOS && !ApplicationHelper.instance.isActive()) {

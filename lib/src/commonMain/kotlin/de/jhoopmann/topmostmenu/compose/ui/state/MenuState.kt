@@ -11,7 +11,10 @@ import de.jhoopmann.topmostmenu.compose.ui.scope.MenuScope
 import de.jhoopmann.topmostmenu.native.Platform
 import de.jhoopmann.topmostmenu.native.platform
 import de.jhoopmann.topmostwindow.awt.native.ApplicationHelper
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
+import org.jetbrains.skiko.MainUIDispatcher
 import java.awt.Point
 
 class MenuState(windowState: WindowState) {
@@ -71,7 +74,8 @@ class MenuState(windowState: WindowState) {
         size: DpSize = windowState.size
     ) {
         withFrameNanos { // set position,size and wait for apply
-            windowState = windowState.copy(position = position, size = size)
+            windowState.position = position
+            windowState.size = size
         }
 
         if (platform == Platform.MacOS && !ApplicationHelper.instance.isActive()) {

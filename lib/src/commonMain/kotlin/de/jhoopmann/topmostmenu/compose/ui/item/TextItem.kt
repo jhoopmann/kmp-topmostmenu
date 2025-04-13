@@ -36,7 +36,7 @@ fun TextItem(
                     textLayout(modifiers, textStyle, text)
                 }
 
-                it()
+                it.invoke()
             }
         }
     }

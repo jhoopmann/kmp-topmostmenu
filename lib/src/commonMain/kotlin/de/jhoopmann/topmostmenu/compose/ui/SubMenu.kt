@@ -4,9 +4,10 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.window.WindowPosition
 import de.jhoopmann.topmostmenu.compose.ui.state.LocalMenuState
 import de.jhoopmann.topmostmenu.compose.ui.state.MenuState

@@ -43,7 +43,7 @@ fun IconItem(
                         iconLayout(modifiers, painter, iconTint, text)
                     }
 
-                    it()
+                    it.invoke()
                 }
             },
             append,

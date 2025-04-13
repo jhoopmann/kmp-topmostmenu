@@ -31,4 +31,3 @@ fun defaultMenuItemModifiers(
     item: Modifier = DefaultItemModifier,
     contents: ItemContentModifiers = defaultItemContentModifiers()
 ): MenuItemModifiers = MenuItemModifiers(menuIcon, icon, text, keyBadge, keyText, item, contents)
-

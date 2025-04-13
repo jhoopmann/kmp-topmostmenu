@@ -39,7 +39,7 @@ fun BaseItem(
                 }
             }).then(item)
         },
-        { it() },
-        { it() }
-    ) { it() }
+        { it.invoke() },
+        { it.invoke() }
+    ) { it.invoke() }
 }

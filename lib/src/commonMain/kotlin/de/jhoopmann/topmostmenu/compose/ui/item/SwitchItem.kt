@@ -41,7 +41,7 @@ fun SwitchItem(
             prepend,
             {
                 append {
-                    it()
+                    it.invoke()
 
                     switchLayout(modifiers, checked)
                 }

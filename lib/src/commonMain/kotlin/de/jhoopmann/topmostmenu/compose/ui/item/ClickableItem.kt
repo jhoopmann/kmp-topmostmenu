@@ -71,7 +71,7 @@ fun ClickableItem(
             prepend,
             { it ->
                 append {
-                    it()
+                    it.invoke()
 
                     if (keyEventMatcher != null) {
                         keyTextLayout(modifiers, keyText, keyTextStyle, keyBadgeColors)

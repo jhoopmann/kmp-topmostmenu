@@ -63,7 +63,7 @@ fun MenuItem(
             prepend,
             {
                 append() {
-                    it()
+                    it.invoke()
 
                     menuIconPainter?.let { painter ->
                         menuIconLayout(modifiers, painter, menuIconTint, text)

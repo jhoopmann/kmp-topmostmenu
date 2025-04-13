@@ -10,7 +10,6 @@ import de.jhoopmann.topmostmenu.compose.ui.scope.MenuScope
 import de.jhoopmann.topmostmenu.compose.ui.state.LocalMenuState
 import de.jhoopmann.topmostmenu.compose.ui.state.MenuState
 import de.jhoopmann.topmostmenu.compose.ui.state.ProvideMenuState
-import de.jhoopmann.topmostmenu.compose.ui.state.copy
 import de.jhoopmann.topmostwindow.awt.ui.TopMostImpl
 import de.jhoopmann.topmostwindow.awt.ui.TopMostOptions
 import de.jhoopmann.topmostwindow.compose.ui.window.TopMostWindow

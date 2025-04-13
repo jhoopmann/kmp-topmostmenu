@@ -81,8 +81,6 @@ fun SubMenu(
                     density,
                 ).run { WindowPosition.Absolute(x = x, y = y) }
 
-                println(currentState.windowState.size)
-
                 val size: DpSize = currentState.windowState.size.takeIf {
                     state?.scope?.initialSize?.isSpecified ?: false
                 } ?: DpSize.Unspecified

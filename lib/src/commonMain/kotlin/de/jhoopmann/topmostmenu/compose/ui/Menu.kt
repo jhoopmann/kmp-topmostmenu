@@ -208,7 +208,7 @@ fun Menu(
         val focusEventListener: FocusEventListener = remember {
             FocusEventListener(state)
         }
-        var eventQueueJob: Job? = null
+        var eventQueueJob: Job? by remember { mutableStateOf(null) }
 
         DisposableEffect(Unit) {
             eventQueueJob = coroutineScope.launch {

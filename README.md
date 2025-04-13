@@ -9,6 +9,7 @@ Uses kmp-compose-topmostwindow to be able to be displayed on foreign fullscreen 
 
 ![Menu on desktop space](/doc/img/desktop-space.png)
 ![Menu on foreign fullscreen spaces.](/doc/img/fullscreen-space.png)
+![Custom Icon Item Composable](/doc/img/custom-icon-item.png)
 
 ## Compatibility
 
@@ -95,7 +96,7 @@ Menu(
 }
 ```
 
-You can use BaseItem to implement whatever layout you want, you can ignore the prepend / append and center methods.
+You can use BaseItem to implement whatever layout you want, just ignore the prepend / append and center methods.
 Example:
 ![Custom Icon Item Composable](/doc/img/custom-icon-item.png)
 

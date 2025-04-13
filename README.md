@@ -96,21 +96,18 @@ Menu(
 ```
 
 You can use BaseItem to implement whatever layout you want.
+Example:
+![Custom Icon Item Composable](/doc/img/custom-icon-item.png)
 
 ```
 @Composable
-fun CustomItem(modifiers: ItemModifiers = ItemModifiers(), customText: Text, layout: ItemLayout = DefaultItemLayout) {
-    BaseItem(modifiers = modifiers) { modifiers, prepend, append, center ->
-        layout(
-            modifiers,
-            prepend,
-            append
-            { it ->
-                center {
-                    Text(customText)
-                }
+fun CustomImageItem() {
+    BaseItem(modifiers = ItemModifiers()) { modifiers, prepend, append, center ->
+        Row(modifier = modifiers.item.padding(20.dp), horizontalArrangement = Arrangement.Center) {
+            Column {
+                Icon(Icons.Default.Abc, modifier = Modifier.size(400.dp), contentDescription = "TestIcon")
             }
-        )
+        }
     }
 }
 

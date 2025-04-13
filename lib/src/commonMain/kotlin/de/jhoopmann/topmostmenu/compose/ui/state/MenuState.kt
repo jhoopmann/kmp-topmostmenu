@@ -105,11 +105,11 @@ class MenuState(windowState: WindowState) {
 
     suspend fun close(
         action: Boolean = false,
-        exceptChild: MenuState? = null
+        except: MenuState? = null
     ) {
-        closeChildren(exceptChild)
+        closeChildren(except)
 
-        if (exceptChild != null && hasDeepChild(exceptChild)) {
+        if (except != null && treeHasChild(except)) {
             return
         }
 
@@ -130,9 +130,9 @@ class MenuState(windowState: WindowState) {
         }
     }
 
-    private fun hasDeepChild(state: MenuState): Boolean {
+    private fun treeHasChild(state: MenuState): Boolean {
         return (children.firstOrNull { it == state } ?: children.firstOrNull {
-            it.hasDeepChild(state)
+            it.treeHasChild(state)
         }) != null
     }
 }

@@ -95,12 +95,80 @@ Menu(
 }
 ```
 
+You can use BaseItem to implement whatever layout you want.
+
+```
+@Composable
+fun CustomItem(modifiers: ItemModifiers = ItemModifiers(), customText: Text, layout: ItemLayout = DefaultItemLayout) {
+    BaseItem(modifiers = modifiers) { modifiers, prepend, append, center ->
+        layout(
+            modifiers,
+            prepend,
+            append
+            { it ->
+                center {
+                    Text(customText)
+                }
+            }
+        )
+    }
+}
+
+```
+
+Or declare your own ItemLayout, default is Row->Row
+```
+@Composable
+fun CustomItem(customText: Text, layout: ItemLayout = { modifiers, prepend, append, content ->
+        Column(modifier = modifiers.item) {
+            Row(modifiers.contents.prepend.wrapContentHeight()) {
+                ProvideLayoutScope(LocalLayoutScope.current?.apply { item = this@Column }) {
+                    prepend {
+                        ... any content ...
+                    }
+                }
+            }
+            Row(modifiers.contents.center.wrapContentHeight()) {
+                ProvideLayoutScope(LocalLayoutScope.current?.apply { item = this@Column }) {
+                    center {
+                        ... any content ...
+                    }
+                }
+            }
+            Row(modifiers.contents.append.wrapContentHeight()) {
+                ProvideLayoutScope(LocalLayoutScope.current?.apply { item = this@Column }) {
+                    appemdm {
+                        ... any content ...
+                    }
+                }
+            }
+        }
+    }
+) {
+    BaseItem() { modifiers, prepend, append, center ->
+        layout(
+            modifiers,
+            prepend,
+            append
+            { it ->
+                center {
+                    Text(customText)
+                }
+            }
+        )
+    }
+}
+```
+
+This
+
 ```
 menuState.open()
 menuState.close()
 ```
 
 Internal usage UI safe (f.e. customized submenue opening/closing)
+
 ```
 menuState.eventQueue.trySend {
     if (!synchronized(menuState) { menuState.processing }) {

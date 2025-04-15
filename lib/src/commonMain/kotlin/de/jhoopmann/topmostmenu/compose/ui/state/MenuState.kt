@@ -74,11 +74,11 @@ class MenuState(windowState: WindowState) {
         position: WindowPosition = windowState.position,
         size: DpSize = windowState.size
     ) {
-        withFrameNanos {
+//        withFrameNanos {
             if (position.isSpecified && position != windowState.position) {
                 windowState.position = position
                 window.location =
-                    Point(position.x.value.toInt(), position.y.value.toInt())// set position,size and wait for apply
+                    Point(position.x.value.toInt(), position.y.value.toInt())// set position,size jand wait for apply
             }
 
             if (size.isSpecified && size != windowState.size) {
@@ -92,15 +92,13 @@ class MenuState(windowState: WindowState) {
                 window.pack()
                 windowState.size = DpSize(window.preferredSize.width.dp, window.preferredSize.height.dp)
             }
-        }
+//        }
 
         if (platform == Platform.MacOS && !ApplicationHelper.instance.isActive()) {
             ApplicationHelper.instance.activate()
         }
 
-        withFrameNanos {
-            window.isVisible = true
-        }
+        window.isVisible = true
 
         synchronized(this) {
             visible = true
@@ -117,9 +115,7 @@ class MenuState(windowState: WindowState) {
             return
         }
 
-        withFrameNanos {
-            window.isVisible = false
-        }
+        window.isVisible = false
 
         synchronized(this) {
             visible = false

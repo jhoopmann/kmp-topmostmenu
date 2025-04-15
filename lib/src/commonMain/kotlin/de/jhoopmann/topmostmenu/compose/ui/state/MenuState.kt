@@ -17,6 +17,7 @@ import de.jhoopmann.topmostmenu.compose.ui.scope.MenuScope
 import de.jhoopmann.topmostmenu.native.Platform
 import de.jhoopmann.topmostmenu.native.platform
 import de.jhoopmann.topmostwindow.awt.native.ApplicationHelper
+import de.jhoopmann.topmostwindow.compose.ui.awt.ComposeTopMostWindow
 import kotlinx.coroutines.channels.Channel
 import java.awt.Dimension
 import java.awt.Point
@@ -28,6 +29,7 @@ class MenuState(
     lateinit var topState: MenuState
     lateinit var scope: MenuScope
     lateinit var composeWindow: ComposeWindow
+    lateinit var composeTopMostWindow: ComposeTopMostWindow
     internal val windowState: WindowState = WindowState(
         position = position,
         size = size,
@@ -103,7 +105,7 @@ class MenuState(
             ApplicationHelper.instance.activate()
         }
 
-        composeWindow.isVisible = true
+        composeTopMostWindow.setVisible(true)
 
         synchronized(this) {
             visible = true
@@ -120,7 +122,7 @@ class MenuState(
             return
         }
 
-        composeWindow.isVisible = false
+        composeTopMostWindow.setVisible(false)
 
         synchronized(this) {
             visible = false

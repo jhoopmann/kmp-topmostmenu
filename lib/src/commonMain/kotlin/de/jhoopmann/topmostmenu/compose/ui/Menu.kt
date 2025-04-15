@@ -68,12 +68,16 @@ fun Menu(
         transparent = true,
         decoration = WindowDecoration.Undecorated(),
         onPreviewKeyEvent = { state.handleKeyEvent(it) },
-        beforeInitialization = { _, _ ->
+        onCreate = {
+            state.composeWindow = it.composeWindow
+            state.composeTopMostWindow = it
+        },
+        onBeforeInitialization = { _, _ ->
             if (parentState == null) {
                 TopMostImpl.setPlatformOptionsBeforeInit(topMostOptions)
             }
         },
-        afterInitialization = { _, _ ->
+        onAfterInitialization = { _, _ ->
             if (parentState == null && state.allInitialized) {
                 TopMostImpl.setPlatformOptionsAfterInit(topMostOptions)
             }
@@ -94,8 +98,6 @@ fun Menu(
             }
         }
     ) {
-        state.composeWindow = window
-
         ProvideMenuState(state = state) {
             layout(state, content)
         }

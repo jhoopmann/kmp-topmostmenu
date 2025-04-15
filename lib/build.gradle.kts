@@ -9,9 +9,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
  */
 
 val targetJvmPlatform: String = project.findProperty("targetJvmPlatform")?.toString() ?: "macos"
+val supportedJavaVersion: String = if (JavaVersion.current().toString().toInt() <= "21".toInt()) {
+    JavaVersion.VERSION_17.toString()
+} else JavaVersion.current().toString()
 
 group = "de.jhoopmann.topmostmenu.compose"
-version = "1.0.0"
+version = "1.2.0"
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -22,7 +25,7 @@ plugins {
 kotlin {
     jvm(targetJvmPlatform) {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_23)
+            jvmTarget.set(JvmTarget.valueOf("JVM_" + supportedJavaVersion))
         }
     }
 
@@ -60,6 +63,6 @@ kotlin {
 // Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(23)
+        languageVersion = JavaLanguageVersion.of(supportedJavaVersion.toInt())
     }
 }

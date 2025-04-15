@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 
 val DefaultIconItemModifier: Modifier = Modifier.size(34.dp)
     .padding(start = 8.dp, top = 8.dp, bottom = 8.dp, end = 0.dp)
-
 val DefaultIconLayout: IconLayout = { modifiers, painter, tint, text ->
     Icon(
         imageVector = painter,

@@ -3,7 +3,7 @@ package de.jhoopmann.topmostmenu.compose.ui.item
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
-class SwitchItemModifiers(
+open class SwitchItemModifiers(
     var switch: Modifier,
     icon: Modifier,
     text: Modifier,

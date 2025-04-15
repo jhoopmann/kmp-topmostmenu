@@ -73,7 +73,7 @@ fun SubMenu(
             topState.eventQueue.trySend {
                 topState.closeChildren(currentState)
 
-                val position: WindowPosition = currentState.windowState.position.takeIf {
+                val position: WindowPosition = currentState.position.takeIf {
                     state?.scope?.initialPosition is WindowPosition.Absolute
                 } ?: currentState.calculatePosition(
                     parentState,
@@ -81,7 +81,7 @@ fun SubMenu(
                     density,
                 ).run { WindowPosition.Absolute(x = x, y = y) }
 
-                val size: DpSize = currentState.windowState.size.takeIf {
+                val size: DpSize = currentState.size.takeIf {
                     state?.scope?.initialSize?.isSpecified ?: false
                 } ?: DpSize.Unspecified
 

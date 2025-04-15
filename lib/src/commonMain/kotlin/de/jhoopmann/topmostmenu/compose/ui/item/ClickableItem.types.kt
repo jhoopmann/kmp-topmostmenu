@@ -14,7 +14,9 @@ open class ClickableItemModifiers(
 ) : ItemModifiers(item, contents)
 
 data class KeyBadgeColors(val background: Color, val content: Color)
+
 data class ItemClickEvent(var result: Boolean = true)
+
 typealias ItemOnClick = (ItemClickEvent) -> Unit
 typealias KeyTextLayout = @Composable (modifiers: ClickableItemModifiers, text: String, textStyle: TextStyle, colors: KeyBadgeColors) -> Unit
 typealias KeyEventMatcher = (KeyEvent) -> Boolean

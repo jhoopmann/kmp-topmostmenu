@@ -14,9 +14,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-val DefaultSeparatorModifier: Modifier =
-    Modifier.fillMaxWidth().padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 2.dp)
-
 @Composable
 fun Separator(
     color: Color = Color.LightGray,

@@ -42,12 +42,12 @@ fun Menu(
         parentState?.children?.add(state)
 
         state.scope = MenuScope(
-            initialPosition = when (val position: WindowPosition = state.windowState.position) {
+            initialPosition = when (val position: WindowPosition = state.position) {
                 is WindowPosition.PlatformDefault -> position
                 is WindowPosition.Absolute -> position.copy()
                 is WindowPosition.Aligned -> position.copy()
             },
-            initialSize = state.windowState.size.copy(),
+            initialSize = state.size.copy(),
             shape = shape,
             modifiers = modifiers,
             actionAutoClose = actionAutoClose,
@@ -58,15 +58,15 @@ fun Menu(
     }
 
     TopMostWindow(
-        visible = false,
         state = state.windowState,
-        decoration = WindowDecoration.Undecorated(),
-        transparent = true,
+        visible = false,
         topMost = true,
         sticky = true,
         skipTaskbar = true,
         resizable = false,
         focusable = true,
+        transparent = true,
+        decoration = WindowDecoration.Undecorated(),
         onPreviewKeyEvent = { state.handleKeyEvent(it) },
         beforeInitialization = { _, _ ->
             if (parentState == null) {
@@ -74,7 +74,7 @@ fun Menu(
             }
         },
         afterInitialization = { _, _ ->
-            if (parentState == null && state.treeInitialized) {
+            if (parentState == null && state.allInitialized) {
                 TopMostImpl.setPlatformOptionsAfterInit(topMostOptions)
             }
 
@@ -102,9 +102,7 @@ fun Menu(
     }
 
     if (parentState == null) {
-        val focusEventListener: FocusEventListener = remember {
-            FocusEventListener(state)
-        }
+        val focusEventListener: FocusEventListener = remember { FocusEventListener(state) }
         var eventQueueJob: Job? by remember { mutableStateOf(null) }
 
         DisposableEffect(Unit) {

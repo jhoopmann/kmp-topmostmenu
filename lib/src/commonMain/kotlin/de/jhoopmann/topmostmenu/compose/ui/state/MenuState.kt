@@ -1,12 +1,15 @@
 package de.jhoopmann.topmostmenu.compose.ui.state
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.isUnspecified
+import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
 import de.jhoopmann.topmostmenu.compose.ui.item.KeyEventMatcher
@@ -18,81 +21,84 @@ import kotlinx.coroutines.channels.Channel
 import java.awt.Dimension
 import java.awt.Point
 
-class MenuState(windowState: WindowState) {
-    private val processingState: MutableState<Boolean> = mutableStateOf(false)
-    var windowState: WindowState by mutableStateOf(windowState)
-    var visible: Boolean by mutableStateOf(false)
-        private set
-    var initialized: Boolean by mutableStateOf(false)
-    val children: MutableList<MenuState> = mutableListOf()
-    val keyEventListeners: MutableList<KeyEventMatcher> = mutableListOf()
-    val eventQueue: Channel<suspend () -> Unit> = Channel(Channel.UNLIMITED)
+class MenuState(
+    position: WindowPosition = WindowPosition.PlatformDefault,
+    size: DpSize = DpSize.Unspecified,
+) {
     lateinit var topState: MenuState
     lateinit var scope: MenuScope
     lateinit var window: ComposeWindow
-    val focused: Boolean
-        get() = window.isFocused
-    val treeInitialized: Boolean
-        get() = initialized && children.all { it.treeInitialized }
-    val treeFocused: Boolean
-        get() = focused || children.any { it.treeFocused }
-    var processing: Boolean
+
+    internal val windowState: WindowState = WindowState(
+        position = position,
+        size = size,
+        placement = WindowPlacement.Floating
+    )
+    internal val eventQueue: Channel<suspend () -> Unit> = Channel(Channel.UNLIMITED)
+    internal val keyEventListeners: MutableList<KeyEventMatcher> = mutableListOf()
+    internal val children: MutableList<MenuState> = mutableListOf()
+    private val processingState: MutableState<Boolean> = mutableStateOf(false)
+    internal var processing: Boolean
         get() = processingState.value || children.any { it.processing }
         set(value) {
             children.forEach { it.processing = value }
 
             processingState.value = value
         }
+    internal val anyFocused: Boolean
+        get() = window.isFocused || children.any { it.anyFocused }
 
-    fun treeVisibleInLocation(location: Point): Boolean {
-        return visibleInLocation(location) ||
-                children.any { it.treeVisibleInLocation(location) }
-    }
-
-    fun visibleInLocation(location: Point): Boolean {
-        if (visible) {
-            return with(windowState.position) {
-                val size: DpSize = windowState.size
-                val xMax: Float = x.value + size.width.value
-                val yMax: Float = y.value + size.height.value
-
-                (location.x >= x.value && location.x <= xMax) &&
-                        (location.y >= y.value && location.y <= yMax)
-            }
-        }
-
-        return false
-    }
-
-    fun handleKeyEvent(event: KeyEvent): Boolean {
-        return keyEventListeners.any { it.invoke(event) } || children.any {
-            it.handleKeyEvent(event)
-        }
-    }
-
-    suspend fun open(
-        position: WindowPosition = windowState.position,
-        size: DpSize = windowState.size
-    ) {
-//        withFrameNanos {
-            if (position.isSpecified && position != windowState.position) {
-                windowState.position = position
-                window.location =
-                    Point(position.x.value.toInt(), position.y.value.toInt())// set position,size jand wait for apply
-            }
-
-            if (size.isSpecified && size != windowState.size) {
-                windowState.size = size
-                window.size = Dimension(size.width.value.toInt(), size.height.value.toInt())
-            } else if (size.isUnspecified) {
+    var size: DpSize
+        get() = windowState.size
+        set(value) {
+            if (value.isSpecified && value != this.size) {
+                window.size = Dimension(value.width.value.toInt(), value.height.value.toInt())
+            } else if (value.isUnspecified) {
                 window.contentPane.size = getPreferredRootSize().run {
                     Dimension(width.value.toInt(), height.value.toInt())
                 }
                 window.rootPane.size = window.contentPane.size
                 window.pack()
-                windowState.size = DpSize(window.preferredSize.width.dp, window.preferredSize.height.dp)
             }
-//        }
+        }
+    var position: WindowPosition
+        get() = windowState.position
+        set(value) {
+            if (value.isSpecified && value != this.position) {
+                window.location = with(value) {
+                    Point(x.value.toInt(), y.value.toInt())
+                }
+            }
+        }
+    var initialized: Boolean by mutableStateOf(false)
+        internal set
+    val allInitialized: Boolean
+        get() = initialized && children.all { it.allInitialized }
+    var visible: Boolean by mutableStateOf(false)
+        private set
+
+    fun anyVisibleInLocation(location: Point): Boolean {
+        return visibleInLocation(location) ||
+                children.any { it.anyVisibleInLocation(location) }
+    }
+
+    fun visibleInLocation(location: Point): Boolean {
+        return visible && with(position) {
+            val size: DpSize = windowState.size
+            val xMax: Float = x.value + size.width.value
+            val yMax: Float = y.value + size.height.value
+
+            (location.x >= x.value && location.x <= xMax) &&
+                    (location.y >= y.value && location.y <= yMax)
+        }
+    }
+
+    fun open(
+        position: WindowPosition = this.position,
+        size: DpSize = this.size
+    ) {
+        this.size = size
+        this.position = position
 
         if (platform == Platform.MacOS && !ApplicationHelper.instance.isActive()) {
             ApplicationHelper.instance.activate()
@@ -105,13 +111,13 @@ class MenuState(windowState: WindowState) {
         }
     }
 
-    suspend fun close(
+    fun close(
         byAction: Boolean = false,
         except: MenuState? = null
     ) {
         closeChildren(except)
 
-        if (except != null && treeHasChild(except)) {
+        if (except != null && hasDeepChild(except)) {
             return
         }
 
@@ -124,13 +130,19 @@ class MenuState(windowState: WindowState) {
         scope.onClosed?.invoke(byAction)
     }
 
-    suspend fun closeChildren(except: MenuState? = null) {
+    fun handleKeyEvent(event: KeyEvent): Boolean {
+        return keyEventListeners.any { it.invoke(event) } || children.any {
+            it.handleKeyEvent(event)
+        }
+    }
+
+    internal fun closeChildren(except: MenuState? = null) {
         children.forEach {
             it.close(false, except)
         }
     }
 
-    private fun treeHasChild(state: MenuState): Boolean {
-        return (children.any { it == state } || children.any { it.treeHasChild(state) })
+    private fun hasDeepChild(state: MenuState): Boolean {
+        return (children.any { it == state } || children.any { it.hasDeepChild(state) })
     }
 }

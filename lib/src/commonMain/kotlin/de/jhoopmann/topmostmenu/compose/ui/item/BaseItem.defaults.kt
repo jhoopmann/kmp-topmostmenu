@@ -10,7 +10,6 @@ val DefaultItemModifier: Modifier = Modifier.height(IntrinsicSize.Max).fillMaxWi
 val DefaultItemContentPrependModifier: Modifier = Modifier.fillMaxHeight()
 val DefaultItemContentAppendModifier: Modifier = Modifier.fillMaxHeight()
 val DefaultItemContentCenterModifier: Modifier = Modifier.fillMaxHeight()
-
 val DefaultItemLayout: ItemLayout = { modifiers, prepend, append, center ->
     Row(modifier = modifiers.item) {
         Row(

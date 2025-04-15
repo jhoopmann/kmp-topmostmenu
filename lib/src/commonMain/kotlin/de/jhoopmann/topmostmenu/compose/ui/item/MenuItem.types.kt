@@ -3,7 +3,7 @@ package de.jhoopmann.topmostmenu.compose.ui.item
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.LayoutCoordinates
 
-class MenuItemModifiers(
+open class MenuItemModifiers(
     var menuIcon: Modifier,
     icon: Modifier,
     text: Modifier,

@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 val DefaultMenuItemIconModifier: Modifier = Modifier.size(34.dp)
     .padding(top = 8.dp, bottom = 8.dp, end = 8.dp, start = 0.dp)
 val DefaultMenuItemIconPainter: ImageVector = Icons.Default.ChevronRight
-
 val DefaultMenuIconLayout: IconLayout = { modifiers, painter, tint, text ->
     Icon(
         imageVector = painter,

@@ -12,7 +12,6 @@ val DefaultSwitchLayout: SwitchLayout = { modifiers, checked ->
         onCheckedChange = null
     )
 }
-
 val DefaultSwitchLayoutModifier: Modifier = Modifier.padding(top = 8.dp, bottom = 8.dp, end = 8.dp, start = 0.dp)
 
 fun defaultSwitchItemModifiers(

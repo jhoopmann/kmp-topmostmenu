@@ -29,13 +29,13 @@ internal fun MenuState.calculatePositionDefault(menuItemPosition: DpOffset, menu
 }
 
 internal fun MenuState.positionLeftExceedsScreen(x: Dp, menuSize: DpSize): Boolean {
-    return topState.window.graphicsConfiguration.bounds.let { screenBounds ->
+    return topState.composeWindow.graphicsConfiguration.bounds.let { screenBounds ->
         (x + menuSize.width) > (screenBounds.width.dp + screenBounds.x.dp)
     }
 }
 
 internal fun MenuState.positionTopExceedsScreen(y: Dp, menuSize: DpSize): Boolean {
-    return topState.window.graphicsConfiguration.bounds.let { screenBounds ->
+    return topState.composeWindow.graphicsConfiguration.bounds.let { screenBounds ->
         (y + menuSize.height) > (screenBounds.height.dp + screenBounds.y.dp)
     }
 }

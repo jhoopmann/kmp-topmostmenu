@@ -4,7 +4,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 
 internal fun MenuState.getPreferredRootSize(): DpSize {
-    return with(window.contentPane) {
+    return with(composeWindow.contentPane) {
         paint(graphics)
         DpSize(preferredSize.width.dp, preferredSize.height.dp)
     }

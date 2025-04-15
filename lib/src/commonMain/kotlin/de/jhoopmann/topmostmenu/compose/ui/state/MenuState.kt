@@ -27,8 +27,7 @@ class MenuState(
 ) {
     lateinit var topState: MenuState
     lateinit var scope: MenuScope
-    lateinit var window: ComposeWindow
-
+    lateinit var composeWindow: ComposeWindow
     internal val windowState: WindowState = WindowState(
         position = position,
         size = size,
@@ -46,26 +45,26 @@ class MenuState(
             processingState.value = value
         }
     internal val anyFocused: Boolean
-        get() = window.isFocused || children.any { it.anyFocused }
+        get() = composeWindow.isFocused || children.any { it.anyFocused }
 
     var size: DpSize
         get() = windowState.size
         set(value) {
             if (value.isSpecified && value != this.size) {
-                window.size = Dimension(value.width.value.toInt(), value.height.value.toInt())
+                composeWindow.size = Dimension(value.width.value.toInt(), value.height.value.toInt())
             } else if (value.isUnspecified) {
-                window.contentPane.size = getPreferredRootSize().run {
+                composeWindow.contentPane.size = getPreferredRootSize().run {
                     Dimension(width.value.toInt(), height.value.toInt())
                 }
-                window.rootPane.size = window.contentPane.size
-                window.pack()
+                composeWindow.rootPane.size = composeWindow.contentPane.size
+                composeWindow.pack()
             }
         }
     var position: WindowPosition
         get() = windowState.position
         set(value) {
             if (value.isSpecified && value != this.position) {
-                window.location = with(value) {
+                composeWindow.location = with(value) {
                     Point(x.value.toInt(), y.value.toInt())
                 }
             }
@@ -104,7 +103,7 @@ class MenuState(
             ApplicationHelper.instance.activate()
         }
 
-        window.isVisible = true
+        composeWindow.isVisible = true
 
         synchronized(this) {
             visible = true
@@ -121,7 +120,7 @@ class MenuState(
             return
         }
 
-        window.isVisible = false
+        composeWindow.isVisible = false
 
         synchronized(this) {
             visible = false

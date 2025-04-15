@@ -94,7 +94,7 @@ fun Menu(
             }
         }
     ) {
-        state.window = window
+        state.composeWindow = window
 
         ProvideMenuState(state = state) {
             layout(state, content)

@@ -12,6 +12,7 @@ import de.jhoopmann.topmostmenu.compose.ui.state.MenuState
 import de.jhoopmann.topmostmenu.compose.ui.state.ProvideMenuState
 import de.jhoopmann.topmostwindow.awt.ui.TopMostImpl
 import de.jhoopmann.topmostwindow.awt.ui.TopMostOptions
+import de.jhoopmann.topmostwindow.compose.ui.awt.ComposeTopMostWindow
 import de.jhoopmann.topmostwindow.compose.ui.window.TopMostWindow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -68,6 +69,7 @@ fun Menu(
         transparent = true,
         decoration = WindowDecoration.Undecorated(),
         onPreviewKeyEvent = { state.handleKeyEvent(it) },
+        create = { ComposeTopMostWindow({}) },
         onCreate = {
             state.composeWindow = it.composeWindow
             state.composeTopMostWindow = it

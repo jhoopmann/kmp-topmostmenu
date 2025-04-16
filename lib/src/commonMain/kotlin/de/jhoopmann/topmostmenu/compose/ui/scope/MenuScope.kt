@@ -6,7 +6,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.WindowPosition
 import de.jhoopmann.topmostmenu.compose.ui.MenuLayout
 import de.jhoopmann.topmostmenu.compose.ui.MenuModifiers
-import de.jhoopmann.topmostmenu.compose.ui.OnClosedEvent
+import de.jhoopmann.topmostmenu.compose.ui.ClosedEvent
 
 data class MenuScope(
     val initialPosition: WindowPosition,
@@ -14,7 +14,7 @@ data class MenuScope(
     val shape: Shape,
     val modifiers: MenuModifiers,
     val actionAutoClose: Boolean,
-    val onClosed: OnClosedEvent?,
+    val onClosed: ClosedEvent?,
     val layoutPadding: PaddingValues,
     val layout: MenuLayout
 )

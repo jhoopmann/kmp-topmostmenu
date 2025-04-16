@@ -20,6 +20,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.internal.synchronized
 import kotlinx.coroutines.launch
 
+
 @OptIn(ExperimentalComposeUiApi::class, InternalCoroutinesApi::class)
 @Composable
 fun Menu(
@@ -27,7 +28,8 @@ fun Menu(
     shape: Shape = DefaultMenuShape,
     modifiers: MenuModifiers = defaultMenuModifiers(shape),
     actionAutoClose: Boolean = true,
-    onClosed: OnClosedEvent? = null,
+    onClosed: ClosedEvent? = null,
+    onInitialized: InitializedEvent? = null,
     layoutPadding: PaddingValues = DefaultLayoutPadding,
     layout: MenuLayout = DefaultMenuWindowLayout,
     content: MenuContent
@@ -84,6 +86,7 @@ fun Menu(
             }
 
             state.initialized = true
+            onInitialized?.invoke(state)
         },
         onCloseRequest = {
             synchronized(topState) {
@@ -108,17 +111,22 @@ fun Menu(
         val focusEventListener: FocusEventListener = remember { FocusEventListener(state) }
         var eventQueueJob: Job? by remember { mutableStateOf(null) }
 
-        DisposableEffect(Unit) {
-            eventQueueJob = coroutineScope.launch {
-                for (block in state.eventQueue) {
-                    block()
+        DisposableEffect(state.initialized) {
+            if (state.initialized) {
+                eventQueueJob = coroutineScope.launch {
+                    for (block in state.eventQueue) {
+                        block()
+                    }
                 }
+                focusEventListener.register()
             }
-            focusEventListener.register()
 
             onDispose {
-                focusEventListener.unregister()
-                eventQueueJob?.cancel()
+                if (eventQueueJob != null) {
+                    focusEventListener.unregister()
+                    eventQueueJob?.cancel()
+                    eventQueueJob = null
+                }
             }
         }
     }

@@ -21,7 +21,7 @@ fun SubMenu(
     shape: Shape? = null,
     modifiers: MenuModifiers? = null,
     autoClose: Boolean? = null,
-    onClosed: OnClosedEvent? = null,
+    onClosed: ClosedEvent? = null,
     layoutPadding: PaddingValues? = null,
     layout: MenuLayout? = null,
     menuItemLayout: MenuItemLayout,

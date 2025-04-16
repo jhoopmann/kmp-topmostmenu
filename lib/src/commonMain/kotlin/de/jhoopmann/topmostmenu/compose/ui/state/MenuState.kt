@@ -78,12 +78,36 @@ class MenuState(
     var visible: Boolean by mutableStateOf(false)
         private set
 
-    fun anyVisibleInLocation(location: Point): Boolean {
+    fun queuedOpen(
+        position: WindowPosition = this.position,
+        size: DpSize = this.size
+    ) {
+        eventQueue.trySend {
+            open(position, size)
+        }
+    }
+
+    fun queuedClose(
+        byAction: Boolean = false,
+        except: MenuState? = null
+    ) {
+        eventQueue.trySend {
+            close(byAction, except)
+        }
+    }
+
+    fun handleKeyEvent(event: KeyEvent): Boolean {
+        return keyEventListeners.any { it.invoke(event) } || children.any {
+            it.handleKeyEvent(event)
+        }
+    }
+
+    internal fun anyVisibleInLocation(location: Point): Boolean {
         return visibleInLocation(location) ||
                 children.any { it.anyVisibleInLocation(location) }
     }
 
-    fun visibleInLocation(location: Point): Boolean {
+    internal fun visibleInLocation(location: Point): Boolean {
         return visible && with(position) {
             val size: DpSize = windowState.size
             val xMax: Float = x.value + size.width.value
@@ -94,7 +118,7 @@ class MenuState(
         }
     }
 
-    fun open(
+    internal fun open(
         position: WindowPosition = this.position,
         size: DpSize = this.size
     ) {
@@ -112,7 +136,7 @@ class MenuState(
         }
     }
 
-    fun close(
+    internal fun close(
         byAction: Boolean = false,
         except: MenuState? = null
     ) {
@@ -129,12 +153,6 @@ class MenuState(
         }
 
         scope.onClosed?.invoke(byAction)
-    }
-
-    fun handleKeyEvent(event: KeyEvent): Boolean {
-        return keyEventListeners.any { it.invoke(event) } || children.any {
-            it.handleKeyEvent(event)
-        }
     }
 
     internal fun closeChildren(except: MenuState? = null) {

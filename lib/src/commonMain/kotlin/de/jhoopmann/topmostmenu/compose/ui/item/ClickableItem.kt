@@ -3,10 +3,13 @@ package de.jhoopmann.topmostmenu.compose.ui.item
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.text.TextStyle
 import de.jhoopmann.topmostmenu.compose.ui.state.LocalMenuState
 import de.jhoopmann.topmostmenu.compose.ui.state.MenuState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun ClickableItem(
@@ -20,7 +23,7 @@ fun ClickableItem(
     layout: ItemLayout = DefaultItemLayout
 ) {
     val menuState: MenuState = LocalMenuState.current!!
-    val topState: MenuState = menuState.topState
+    val coroutineScope: CoroutineScope = rememberCoroutineScope()
 
     val onClickWithClose: () -> Boolean = remember {
         {
@@ -29,17 +32,9 @@ fun ClickableItem(
 
             if (event.result) {
                 menuState.takeIf { it.scope.actionAutoClose }?.run {
-                    synchronized(topState) {
-                        topState.processing = true
-                    }
-
-                    topState.eventQueue.trySend {
+                    coroutineScope.launch {
                         delay(300)
                         menuState.close(true)
-
-                        synchronized(topState) {
-                            topState.processing = false
-                        }
                     }
                 }
             }

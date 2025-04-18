@@ -4,17 +4,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.isSpecified
-import androidx.compose.ui.window.WindowPosition
+import de.jhoopmann.topmostmenu.compose.ui.state.HoverTargetOperation
 import de.jhoopmann.topmostmenu.compose.ui.state.LocalMenuState
+import de.jhoopmann.topmostmenu.compose.ui.state.MenuHoverAction
 import de.jhoopmann.topmostmenu.compose.ui.state.MenuState
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.internal.synchronized
 
-@OptIn(InternalCoroutinesApi::class)
 @Composable
 fun SubMenu(
     state: MenuState? = null,
@@ -27,7 +21,6 @@ fun SubMenu(
     menuItemLayout: MenuItemLayout,
     content: MenuContent
 ) {
-    val density: Density = LocalDensity.current
     val parentState: MenuState = LocalMenuState.current!!
     val currentState: MenuState = state ?: rememberDefaultMenuState()
     val topState: MenuState = parentState.topState
@@ -41,17 +34,7 @@ fun SubMenu(
             onClosed?.invoke(it)
 
             if (it) {
-                synchronized(topState) {
-                    currentState.processing = true
-                }
-
-                topState.eventQueue.trySend {
-                    parentState.close(it)
-
-                    synchronized(topState) {
-                        currentState.processing = false
-                    }
-                }
+                parentState.close(it)
             }
         },
         modifiers = modifiers ?: parentState.scope.modifiers,
@@ -63,34 +46,11 @@ fun SubMenu(
     menuItemLayout({
         menuItemCoordinates = it
     }, {
-        if (!synchronized(currentState) { currentState.visible } && synchronized(topState) {
-                if (!currentState.processing) {
-                    currentState.processing = true
-                    true
-                } else false
-            }
-        ) {
-            topState.eventQueue.trySend {
-                topState.closeChildren(currentState)
-
-                val position: WindowPosition = currentState.position.takeIf {
-                    state?.scope?.initialPosition is WindowPosition.Absolute
-                } ?: currentState.calculatePosition(
-                    parentState,
-                    menuItemCoordinates!!,
-                    density,
-                ).run { WindowPosition.Absolute(x = x, y = y) }
-
-                val size: DpSize = currentState.size.takeIf {
-                    state?.scope?.initialSize?.isSpecified ?: false
-                } ?: DpSize.Unspecified
-
-                currentState.open(position = position, size = size)
-
-                synchronized(topState) {
-                    currentState.processing = false
-                }
-            }
-        }
+        topState.menuHoverActionState.value = MenuHoverAction(
+            operation = HoverTargetOperation.OPEN,
+            state = currentState,
+            parentState = parentState,
+            menuItemCoordinates = menuItemCoordinates
+        )
     })
 }

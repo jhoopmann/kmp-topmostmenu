@@ -1,24 +1,25 @@
 package de.jhoopmann.topmostmenu.compose.ui.state
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
+import de.jhoopmann.topmostmenu.compose.ui.calculatePosition
 import de.jhoopmann.topmostmenu.compose.ui.item.KeyEventMatcher
 import de.jhoopmann.topmostmenu.compose.ui.scope.MenuScope
 import de.jhoopmann.topmostmenu.native.Platform
 import de.jhoopmann.topmostmenu.native.platform
 import de.jhoopmann.topmostwindow.awt.native.ApplicationHelper
 import de.jhoopmann.topmostwindow.compose.ui.awt.ComposeTopMostWindow
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.awt.Dimension
 import java.awt.Point
 import java.lang.ref.WeakReference
@@ -35,9 +36,9 @@ class MenuState(
         size = size,
         placement = WindowPlacement.Floating
     )
-    internal val eventQueue: Channel<suspend () -> Unit> = Channel(Channel.UNLIMITED)
-    internal val keyEventListeners: MutableList<KeyEventMatcher> = mutableListOf()
     internal val children: MutableList<MenuState> = mutableListOf()
+    internal val menuHoverActionState: MutableStateFlow<MenuHoverAction?> = MutableStateFlow(null)
+    internal val keyEventListeners: MutableList<KeyEventMatcher> = mutableListOf()
     private var composeTopMostWindowRef: WeakReference<ComposeTopMostWindow>? = null
     internal var composeTopMostWindow: ComposeTopMostWindow
         get() = composeTopMostWindowRef?.get()!!
@@ -51,14 +52,6 @@ class MenuState(
         set(value) {
             composeWindowRef?.clear()
             composeWindowRef = WeakReference(value)
-        }
-    private val processingState: MutableState<Boolean> = mutableStateOf(false)
-    internal var processing: Boolean
-        get() = processingState.value || children.any { it.processing }
-        set(value) {
-            children.forEach { it.processing = value }
-
-            processingState.value = value
         }
     internal val anyFocused: Boolean
         get() = composeWindow.isFocused || children.any { it.anyFocused }
@@ -89,57 +82,28 @@ class MenuState(
         internal set
     val allInitialized: Boolean
         get() = initialized && children.all { it.allInitialized }
-    var visible: Boolean by mutableStateOf(false)
+    var isVisible: Boolean by mutableStateOf(false)
         private set
 
-    fun queuedOpen(
+    fun open(
         position: WindowPosition = this.position,
         size: DpSize = this.size
     ) {
-        topState.eventQueue.trySend {
-            open(position, size)
-        }
-    }
-
-    fun queuedClose(
-        byAction: Boolean = false,
-        except: MenuState? = null
-    ) {
-        topState.eventQueue.trySend {
-            close(byAction, except)
-        }
-    }
-
-    fun handleKeyEvent(event: KeyEvent): Boolean {
-        return keyEventListeners.any { it.invoke(event) } || children.any {
-            it.handleKeyEvent(event)
-        }
-    }
-
-    internal fun anyVisibleInLocation(location: Point): Boolean {
-        return visibleInLocation(location) ||
-                children.any { it.anyVisibleInLocation(location) }
-    }
-
-    internal fun open(
-        position: WindowPosition = this.position,
-        size: DpSize = this.size
-    ) {
-        this.size = size
         this.position = position
+        this.size = size
 
         if (platform == Platform.MacOS && !ApplicationHelper.instance.isActive()) {
             ApplicationHelper.instance.activate()
         }
 
-        composeTopMostWindow.setVisible(true)
-
-        synchronized(this) {
-            visible = true
+        if (!composeTopMostWindow.isVisible) {
+            composeTopMostWindow.isVisible = true
         }
+
+        isVisible = true
     }
 
-    internal fun close(
+    fun close(
         byAction: Boolean = false,
         except: MenuState? = null
     ) {
@@ -149,16 +113,52 @@ class MenuState(
             return
         }
 
-        composeTopMostWindow.setVisible(false)
-
-        synchronized(this) {
-            visible = false
+        if (composeTopMostWindow.isVisible) {
+            composeTopMostWindow.isVisible = false
         }
+
+        isVisible = false
 
         scope.onClosed?.invoke(byAction)
     }
 
-    internal fun closeChildren(except: MenuState? = null) {
+    fun handleKeyEvent(event: KeyEvent): Boolean {
+        return keyEventListeners.any { it.invoke(event) } || children.any {
+            it.handleKeyEvent(event)
+        }
+    }
+
+    internal fun handleHoverTarget(target: MenuHoverAction, density: Density) {
+        when (target.operation) {
+            HoverTargetOperation.OPEN -> {
+                topState.closeChildren(this)
+
+                val newPosition: WindowPosition = target.state.position.takeIf {
+                    scope.initialPosition is WindowPosition.Absolute
+                } ?: calculatePosition(
+                    target.parentState!!,
+                    target.menuItemCoordinates!!,
+                    density,
+                ).run { WindowPosition.Absolute(x = x, y = y) }
+
+                val newSize: DpSize = size.takeIf { scope.initialSize.isSpecified }
+                    ?: DpSize.Unspecified
+
+                open(position = newPosition, size = newSize)
+            }
+
+            HoverTargetOperation.CLOSE -> {
+                target.state.closeChildren()
+            }
+        }
+    }
+
+    internal fun anyVisibleInLocation(location: Point): Boolean {
+        return visibleInLocation(location) ||
+                children.any { it.anyVisibleInLocation(location) }
+    }
+
+    private fun closeChildren(except: MenuState? = null) {
         children.forEach {
             it.close(false, except)
         }
@@ -169,7 +169,7 @@ class MenuState(
     }
 
     private fun visibleInLocation(location: Point): Boolean {
-        return visible && with(position) {
+        return isVisible && with(position) {
             val size: DpSize = windowState.size
             val xMax: Float = x.value + size.width.value
             val yMax: Float = y.value + size.height.value

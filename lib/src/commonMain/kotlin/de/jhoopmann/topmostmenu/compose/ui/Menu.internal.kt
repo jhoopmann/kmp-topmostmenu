@@ -12,24 +12,8 @@ internal class FocusEventListener(
 ) : AWTEventListener {
     override fun eventDispatched(event: AWTEvent?) {
         if (event is FocusEvent && event.id == FocusEvent.FOCUS_LOST) {
-            if (!topState.anyVisibleInLocation(MouseInfo.getPointerInfo().location)) {
-                if (synchronized(topState) {
-                        if (!topState.processing) {
-                            topState.processing = true
-                            true
-                        } else false
-                    }
-                ) {
-                    topState.eventQueue.trySend {
-                        if (!topState.anyFocused) {
-                            topState.close(false)
-                        }
-
-                        synchronized(topState) {
-                            topState.processing = false
-                        }
-                    }
-                }
+            if (!topState.anyVisibleInLocation(MouseInfo.getPointerInfo().location)) {        
+                topState.close()
             }
         }
     }

@@ -41,6 +41,7 @@ fun Menu(
     state.topState = topState
 
     remember {
+        println("CREATE SCOPE")
         parentState?.children?.add(state)
 
         state.scope = MenuScope(

@@ -29,18 +29,18 @@ class MenuState(
 ) {
     lateinit var topState: MenuState
     lateinit var scope: MenuScope
-    private var composeTopMostWindowRef: WeakReference<ComposeTopMostWindow>? = null
-    internal var composeTopMostWindow: ComposeTopMostWindow?
-        get() = composeTopMostWindowRef?.get()
+    private lateinit var composeTopMostWindowRef: WeakReference<ComposeTopMostWindow>
+    internal var composeTopMostWindow: ComposeTopMostWindow
+        get() = composeTopMostWindowRef.get()!!
         set(value) {
-            composeTopMostWindowRef?.clear()
+            composeTopMostWindowRef.clear()
             composeTopMostWindowRef = WeakReference(value)
         }
-    private var composeWindowRef: WeakReference<ComposeWindow>? = null
-    internal var composeWindow: ComposeWindow?
-        get() = composeWindowRef?.get()
+    private lateinit var composeWindowRef: WeakReference<ComposeWindow>
+    internal var composeWindow: ComposeWindow
+        get() = composeWindowRef.get()!!
         set(value) {
-            composeWindowRef?.clear()
+            composeWindowRef.clear()
             composeWindowRef = WeakReference(value)
         }
     internal val windowState: WindowState = WindowState(

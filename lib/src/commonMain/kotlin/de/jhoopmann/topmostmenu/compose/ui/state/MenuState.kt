@@ -29,20 +29,7 @@ class MenuState(
 ) {
     lateinit var topState: MenuState
     lateinit var scope: MenuScope
-    private lateinit var composeTopMostWindowRef: WeakReference<ComposeTopMostWindow>
-    internal var composeTopMostWindow: ComposeTopMostWindow
-        get() = composeTopMostWindowRef.get()!!
-        set(value) {
-            composeTopMostWindowRef.clear()
-            composeTopMostWindowRef = WeakReference(value)
-        }
-    private lateinit var composeWindowRef: WeakReference<ComposeWindow>
-    internal var composeWindow: ComposeWindow
-        get() = composeWindowRef.get()!!
-        set(value) {
-            composeWindowRef.clear()
-            composeWindowRef = WeakReference(value)
-        }
+
     internal val windowState: WindowState = WindowState(
         position = position,
         size = size,
@@ -51,6 +38,20 @@ class MenuState(
     internal val eventQueue: Channel<suspend () -> Unit> = Channel(Channel.UNLIMITED)
     internal val keyEventListeners: MutableList<KeyEventMatcher> = mutableListOf()
     internal val children: MutableList<MenuState> = mutableListOf()
+    private var composeTopMostWindowRef: WeakReference<ComposeTopMostWindow>? = null
+    internal var composeTopMostWindow: ComposeTopMostWindow
+        get() = composeTopMostWindowRef?.get()!!
+        set(value) {
+            composeTopMostWindowRef?.clear()
+            composeTopMostWindowRef = WeakReference(value)
+        }
+    private var composeWindowRef: WeakReference<ComposeWindow>? = null
+    internal var composeWindow: ComposeWindow
+        get() = composeWindowRef?.get()!!
+        set(value) {
+            composeWindowRef?.clear()
+            composeWindowRef = WeakReference(value)
+        }
     private val processingState: MutableState<Boolean> = mutableStateOf(false)
     internal var processing: Boolean
         get() = processingState.value || children.any { it.processing }
@@ -120,17 +121,6 @@ class MenuState(
                 children.any { it.anyVisibleInLocation(location) }
     }
 
-    internal fun visibleInLocation(location: Point): Boolean {
-        return visible && with(position) {
-            val size: DpSize = windowState.size
-            val xMax: Float = x.value + size.width.value
-            val yMax: Float = y.value + size.height.value
-
-            (location.x >= x.value && location.x <= xMax) &&
-                    (location.y >= y.value && location.y <= yMax)
-        }
-    }
-
     internal fun open(
         position: WindowPosition = this.position,
         size: DpSize = this.size
@@ -176,5 +166,16 @@ class MenuState(
 
     private fun hasDeepChild(state: MenuState): Boolean {
         return (children.any { it == state } || children.any { it.hasDeepChild(state) })
+    }
+
+    private fun visibleInLocation(location: Point): Boolean {
+        return visible && with(position) {
+            val size: DpSize = windowState.size
+            val xMax: Float = x.value + size.width.value
+            val yMax: Float = y.value + size.height.value
+
+            (location.x >= x.value && location.x <= xMax) &&
+                    (location.y >= y.value && location.y <= yMax)
+        }
     }
 }

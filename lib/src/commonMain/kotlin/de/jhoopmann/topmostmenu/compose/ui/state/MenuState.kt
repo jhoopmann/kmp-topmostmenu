@@ -96,9 +96,7 @@ class MenuState(
             ApplicationHelper.instance.activate()
         }
 
-        if (!composeTopMostWindow.isVisible) {
             composeTopMostWindow.isVisible = true
-        }
 
         isVisible = true
     }

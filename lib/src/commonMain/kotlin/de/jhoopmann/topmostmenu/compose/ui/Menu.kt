@@ -10,16 +10,15 @@ import de.jhoopmann.topmostmenu.compose.ui.scope.MenuScope
 import de.jhoopmann.topmostmenu.compose.ui.state.LocalMenuState
 import de.jhoopmann.topmostmenu.compose.ui.state.MenuState
 import de.jhoopmann.topmostmenu.compose.ui.state.ProvideMenuState
-import de.jhoopmann.topmostwindow.awt.ui.TopMostImpl
 import de.jhoopmann.topmostwindow.awt.ui.TopMostOptions
-import de.jhoopmann.topmostwindow.compose.ui.awt.ComposeTopMostWindow
 import de.jhoopmann.topmostwindow.compose.ui.window.TopMostWindow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.internal.synchronized
 import kotlinx.coroutines.launch
-
+import java.lang.ref.PhantomReference
+import java.lang.ref.WeakReference
 
 @OptIn(ExperimentalComposeUiApi::class, InternalCoroutinesApi::class)
 @Composable

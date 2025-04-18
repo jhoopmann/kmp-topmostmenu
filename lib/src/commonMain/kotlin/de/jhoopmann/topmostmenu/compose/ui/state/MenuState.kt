@@ -21,6 +21,7 @@ import de.jhoopmann.topmostwindow.compose.ui.awt.ComposeTopMostWindow
 import kotlinx.coroutines.channels.Channel
 import java.awt.Dimension
 import java.awt.Point
+import java.lang.ref.WeakReference
 
 class MenuState(
     position: WindowPosition = WindowPosition.PlatformDefault,
@@ -28,8 +29,20 @@ class MenuState(
 ) {
     lateinit var topState: MenuState
     lateinit var scope: MenuScope
-    lateinit var composeWindow: ComposeWindow
-    lateinit var composeTopMostWindow: ComposeTopMostWindow
+    private var composeTopMostWindowRef: WeakReference<ComposeTopMostWindow>? = null
+    internal var composeTopMostWindow: ComposeTopMostWindow?
+        get() = composeTopMostWindowRef?.get()
+        set(value) {
+            composeTopMostWindowRef?.clear()
+            composeTopMostWindowRef = WeakReference(value)
+        }
+    private var composeWindowRef: WeakReference<ComposeWindow>? = null
+    internal var composeWindow: ComposeWindow?
+        get() = composeWindowRef?.get()
+        set(value) {
+            composeWindowRef?.clear()
+            composeWindowRef = WeakReference(value)
+        }
     internal val windowState: WindowState = WindowState(
         position = position,
         size = size,

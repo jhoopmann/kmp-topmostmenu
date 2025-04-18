@@ -36,15 +36,11 @@ fun Menu(
     val coroutineScope: CoroutineScope = rememberCoroutineScope()
     val parentState: MenuState? = LocalMenuState.current
     val topState: MenuState = parentState?.topState ?: state
-    val topMostOptions: TopMostOptions = remember { TopMostOptions() }
+    val topMostOptions: TopMostOptions = remember { TopMostOptions(topMost = true, sticky = true, skipTaskbar = true) }
 
     state.topState = topState
-
-    remember {
-        println("CREATE SCOPE")
-        parentState?.children?.add(state)
-
-        state.scope = MenuScope(
+    state.scope = remember {
+        MenuScope(
             initialPosition = when (val position: WindowPosition = state.position) {
                 is WindowPosition.PlatformDefault -> position
                 is WindowPosition.Absolute -> position.copy()
@@ -63,9 +59,9 @@ fun Menu(
     TopMostWindow(
         state = state.windowState,
         visible = false,
-        topMost = true,
-        sticky = true,
-        skipTaskbar = true,
+        topMost = topMostOptions.topMost,
+        sticky = topMostOptions.sticky,
+        skipTaskbar = topMostOptions.skipTaskbar,
         resizable = false,
         focusable = true,
         transparent = true,
@@ -104,6 +100,14 @@ fun Menu(
     ) {
         ProvideMenuState(state = state) {
             layout(state, content)
+        }
+    }
+
+    DisposableEffect(Unit) {
+        parentState?.children?.add(state)
+
+        onDispose {
+            parentState?.children?.remove(state)
         }
     }
 

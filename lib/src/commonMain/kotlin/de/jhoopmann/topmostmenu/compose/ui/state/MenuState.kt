@@ -96,7 +96,7 @@ class MenuState(
         position: WindowPosition = this.position,
         size: DpSize = this.size
     ) {
-        eventQueue.trySend {
+        topState.eventQueue.trySend {
             open(position, size)
         }
     }
@@ -105,7 +105,7 @@ class MenuState(
         byAction: Boolean = false,
         except: MenuState? = null
     ) {
-        eventQueue.trySend {
+        topState.eventQueue.trySend {
             close(byAction, except)
         }
     }

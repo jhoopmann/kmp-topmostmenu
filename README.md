@@ -158,20 +158,11 @@ fun CustomItem(customText: Text, layout: ItemLayout = { modifiers, prepend, appe
 }
 ```
 
-This
+Emit menu action to close or open. Actions are debounced (32ms) collected an.
 
 ```
-menuState.open()
-menuState.close()
-```
-
-Internal usage UI safe (f.e. customized submenue opening/closing)
-```
-menuState.eventQueue.trySend {
-    if (!synchronized(menuState) { menuState.processing }) {
-        menuState.close()
-    }
-}
+menuState.emitOpen()
+menuState.emitClose()
 ```
 
 Pass AwtWindow onPreviewKey or onKey KeyEvents to menuState.handleKeyEvent for keyboard shortcuts 

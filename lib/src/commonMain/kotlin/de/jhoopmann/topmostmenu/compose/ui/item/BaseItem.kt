@@ -20,9 +20,7 @@ fun BaseItem(
         modifiers.apply {
             item = Modifier.onPointerEvent(PointerEventType.Enter, onEvent = { event ->
                 if (!event.changes.first().isConsumed) {
-                    menuState.emitAction {
-                        menuState.closeChildren()
-                    }
+                    menuState.emitCloseChildren()
                 }
             }).then(item)
         },

@@ -34,9 +34,7 @@ fun ClickableItem(
                 menuState.takeIf { it.scope.actionAutoClose }?.run {
                     coroutineScope.launch {
                         delay(300)
-                        menuState.emitAction {
-                            close(true)
-                        }
+                        menuState.emitClose(true)
                     }
                 }
             }

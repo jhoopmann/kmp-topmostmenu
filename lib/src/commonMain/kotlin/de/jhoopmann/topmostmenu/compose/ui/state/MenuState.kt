@@ -94,8 +94,12 @@ class MenuState(
         emitAction { open(position, size) }
     }
 
-    fun emitClose() {
-        emitAction { close() }
+    fun emitClose(byAction: Boolean = false) {
+        emitAction { close(byAction) }
+    }
+
+    fun emitCloseChildren() {
+        emitAction { closeChildren() }
     }
 
     fun handleKeyEvent(event: KeyEvent): Boolean {

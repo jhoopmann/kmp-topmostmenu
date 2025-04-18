@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.WindowState
-import de.jhoopmann.topmostmenu.compose.ui.calculatePosition
 import de.jhoopmann.topmostmenu.compose.ui.item.KeyEventMatcher
 import de.jhoopmann.topmostmenu.compose.ui.scope.MenuScope
 import de.jhoopmann.topmostmenu.native.Platform
@@ -96,7 +95,9 @@ class MenuState(
             ApplicationHelper.instance.activate()
         }
 
+        if (!composeTopMostWindow.isVisible) {
             composeTopMostWindow.isVisible = true
+        }
 
         isVisible = true
     }

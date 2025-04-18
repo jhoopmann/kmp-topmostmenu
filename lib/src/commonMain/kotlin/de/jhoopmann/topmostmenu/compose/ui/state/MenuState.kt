@@ -146,7 +146,7 @@ class MenuState(
     ) {
         closeChildren(except)
 
-        if (except != null && hasDeepChild(except)) {
+        if (except != null && (except == this || hasDeepChild(except))) {
             return
         }
 

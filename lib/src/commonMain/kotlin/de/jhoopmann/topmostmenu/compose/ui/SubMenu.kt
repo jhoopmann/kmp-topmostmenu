@@ -51,6 +51,10 @@ fun SubMenu(
         menuItemCoordinates = it
     }, {
         currentState.emitAction {
+            if (currentState.isVisible) {
+                return@emitAction
+            }
+
             topState.closeChildren(currentState)
 
             val newPosition: WindowPosition = currentState.position.takeIf {

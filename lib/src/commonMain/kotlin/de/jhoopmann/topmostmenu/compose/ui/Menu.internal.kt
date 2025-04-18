@@ -1,6 +1,7 @@
 package de.jhoopmann.topmostmenu.compose.ui
 
 import de.jhoopmann.topmostmenu.compose.ui.state.MenuState
+import kotlinx.coroutines.delay
 import java.awt.AWTEvent
 import java.awt.MouseInfo
 import java.awt.Toolkit
@@ -13,7 +14,13 @@ internal class FocusEventListener(
     override fun eventDispatched(event: AWTEvent?) {
         if (event is FocusEvent && event.id == FocusEvent.FOCUS_LOST) {
             if (!menuState.anyVisibleInLocation(MouseInfo.getPointerInfo().location)) {
-                menuState.emitClose()
+                menuState.emitAction {
+                    delay(16 * 2)
+
+                    if (!menuState.anyFocused) {
+                        menuState.close()
+                    }
+                }
             }
         }
     }

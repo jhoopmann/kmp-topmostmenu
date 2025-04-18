@@ -39,7 +39,6 @@ class MenuState(
         placement = WindowPlacement.Floating
     )
     internal val children: MutableList<MenuState> = mutableListOf()
-    internal val menuActionState: MutableStateFlow<MenuAction?> = MutableStateFlow(null)
     internal val keyEventListeners: MutableList<KeyEventMatcher> = mutableListOf()
     private var composeTopMostWindowRef: WeakReference<ComposeTopMostWindow>? = null
     internal var composeTopMostWindow: ComposeTopMostWindow
@@ -57,6 +56,7 @@ class MenuState(
         }
     internal val anyFocused: Boolean
         get() = composeWindow.isFocused || children.any { it.anyFocused }
+    private val menuActionState: MutableStateFlow<MenuAction?> = MutableStateFlow(null)
 
     var size: DpSize
         get() = windowState.size

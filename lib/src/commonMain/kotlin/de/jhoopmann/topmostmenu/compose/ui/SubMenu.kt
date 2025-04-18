@@ -10,9 +10,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.window.WindowPosition
 import de.jhoopmann.topmostmenu.compose.ui.state.LocalMenuState
-import de.jhoopmann.topmostmenu.compose.ui.state.MenuAction
 import de.jhoopmann.topmostmenu.compose.ui.state.MenuState
-import de.jhoopmann.topmostmenu.compose.ui.state.calculatePosition
 
 @Composable
 fun SubMenu(

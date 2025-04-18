@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.isUnspecified
@@ -18,7 +17,11 @@ import de.jhoopmann.topmostmenu.native.Platform
 import de.jhoopmann.topmostmenu.native.platform
 import de.jhoopmann.topmostwindow.awt.native.ApplicationHelper
 import de.jhoopmann.topmostwindow.compose.ui.awt.ComposeTopMostWindow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.*
 import java.awt.Dimension
 import java.awt.Point
 import java.lang.ref.WeakReference
@@ -36,7 +39,7 @@ class MenuState(
         placement = WindowPlacement.Floating
     )
     internal val children: MutableList<MenuState> = mutableListOf()
-    internal val menuHoverActionState: MutableStateFlow<MenuHoverAction?> = MutableStateFlow(null)
+    internal val menuActionState: MutableStateFlow<MenuAction?> = MutableStateFlow(null)
     internal val keyEventListeners: MutableList<KeyEventMatcher> = mutableListOf()
     private var composeTopMostWindowRef: WeakReference<ComposeTopMostWindow>? = null
     internal var composeTopMostWindow: ComposeTopMostWindow
@@ -84,7 +87,38 @@ class MenuState(
     var isVisible: Boolean by mutableStateOf(false)
         private set
 
-    fun open(
+    fun emitOpen(
+        position: WindowPosition = this.position,
+        size: DpSize = this.size
+    ) {
+        emitAction { open(position, size) }
+    }
+
+    fun emitClose() {
+        emitAction { close() }
+    }
+
+    fun handleKeyEvent(event: KeyEvent): Boolean {
+        return keyEventListeners.any { it.invoke(event) } || children.any {
+            it.handleKeyEvent(event)
+        }
+    }
+
+    @OptIn(FlowPreview::class)
+    internal fun launchActionCoroutine(coroutineScope: CoroutineScope): Job {
+        return topState.menuActionState.debounce(16 * 2)
+            .distinctUntilChanged()
+            .filterNotNull()
+            .onEach { it.invoke() }
+            .flowOn(Dispatchers.Main)
+            .launchIn(coroutineScope)
+    }
+
+    internal fun emitAction(action: MenuAction) {
+        topState.menuActionState.value = action
+    }
+
+    internal fun open(
         position: WindowPosition = this.position,
         size: DpSize = this.size
     ) {
@@ -102,7 +136,7 @@ class MenuState(
         isVisible = true
     }
 
-    fun close(
+    internal fun close(
         byAction: Boolean = false,
         except: MenuState? = null
     ) {
@@ -121,46 +155,15 @@ class MenuState(
         scope.onClosed?.invoke(byAction)
     }
 
-    fun handleKeyEvent(event: KeyEvent): Boolean {
-        return keyEventListeners.any { it.invoke(event) } || children.any {
-            it.handleKeyEvent(event)
-        }
-    }
-
-    internal fun handleHoverTarget(target: MenuHoverAction, density: Density) {
-        when (target.operation) {
-            HoverTargetOperation.OPEN -> {
-                topState.closeChildren(this)
-
-                val newPosition: WindowPosition = target.state.position.takeIf {
-                    scope.initialPosition is WindowPosition.Absolute
-                } ?: calculatePosition(
-                    target.parentState!!,
-                    target.menuItemCoordinates!!,
-                    density,
-                ).run { WindowPosition.Absolute(x = x, y = y) }
-
-                val newSize: DpSize = size.takeIf { scope.initialSize.isSpecified }
-                    ?: DpSize.Unspecified
-
-                open(position = newPosition, size = newSize)
-            }
-
-            HoverTargetOperation.CLOSE -> {
-                target.state.closeChildren()
-            }
+    internal fun closeChildren(except: MenuState? = null) {
+        children.forEach {
+            it.close(false, except)
         }
     }
 
     internal fun anyVisibleInLocation(location: Point): Boolean {
         return visibleInLocation(location) ||
                 children.any { it.anyVisibleInLocation(location) }
-    }
-
-    private fun closeChildren(except: MenuState? = null) {
-        children.forEach {
-            it.close(false, except)
-        }
     }
 
     private fun hasDeepChild(state: MenuState): Boolean {

@@ -4,10 +4,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.LayoutCoordinates
-import de.jhoopmann.topmostmenu.compose.ui.state.HoverTargetOperation
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.isSpecified
+import androidx.compose.ui.window.WindowPosition
 import de.jhoopmann.topmostmenu.compose.ui.state.LocalMenuState
-import de.jhoopmann.topmostmenu.compose.ui.state.MenuHoverAction
+import de.jhoopmann.topmostmenu.compose.ui.state.MenuAction
 import de.jhoopmann.topmostmenu.compose.ui.state.MenuState
+import de.jhoopmann.topmostmenu.compose.ui.state.calculatePosition
 
 @Composable
 fun SubMenu(
@@ -21,6 +26,7 @@ fun SubMenu(
     menuItemLayout: MenuItemLayout,
     content: MenuContent
 ) {
+    val density: Density = LocalDensity.current
     val parentState: MenuState = LocalMenuState.current!!
     val currentState: MenuState = state ?: rememberDefaultMenuState()
     val topState: MenuState = parentState.topState
@@ -46,11 +52,21 @@ fun SubMenu(
     menuItemLayout({
         menuItemCoordinates = it
     }, {
-        topState.menuHoverActionState.value = MenuHoverAction(
-            operation = HoverTargetOperation.OPEN,
-            state = currentState,
-            parentState = parentState,
-            menuItemCoordinates = menuItemCoordinates
-        )
+        currentState.emitAction {
+            topState.closeChildren(currentState)
+
+            val newPosition: WindowPosition = currentState.position.takeIf {
+                currentState.scope.initialPosition is WindowPosition.Absolute
+            } ?: currentState.calculatePosition(
+                parentState,
+                menuItemCoordinates!!,
+                density,
+            ).run { WindowPosition.Absolute(x = x, y = y) }
+
+            val newSize: DpSize = currentState.size.takeIf { currentState.scope.initialSize.isSpecified }
+                ?: DpSize.Unspecified
+
+            currentState.open(position = newPosition, size = newSize)
+        }
     })
 }

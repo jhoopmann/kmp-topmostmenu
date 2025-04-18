@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.window.WindowDecoration
 import androidx.compose.ui.window.WindowPosition
 import de.jhoopmann.topmostmenu.compose.ui.scope.MenuScope
@@ -14,10 +12,10 @@ import de.jhoopmann.topmostmenu.compose.ui.state.MenuState
 import de.jhoopmann.topmostmenu.compose.ui.state.ProvideMenuState
 import de.jhoopmann.topmostwindow.awt.ui.TopMostOptions
 import de.jhoopmann.topmostwindow.compose.ui.window.TopMostWindow
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 
-@OptIn(ExperimentalComposeUiApi::class, FlowPreview::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Menu(
     state: MenuState,
@@ -30,7 +28,6 @@ fun Menu(
     layout: MenuLayout = DefaultMenuWindowLayout,
     content: MenuContent
 ) {
-    val coroutineScope: CoroutineScope = rememberCoroutineScope()
     val parentState: MenuState? = LocalMenuState.current
     val topState: MenuState = parentState?.topState ?: state
     val topMostOptions: TopMostOptions = remember { TopMostOptions(topMost = true, sticky = true, skipTaskbar = true) }
@@ -82,7 +79,7 @@ fun Menu(
             onInitialized?.invoke(state)
         },
         onCloseRequest = {
-            state.close()
+            state.emitClose()
         }
     ) {
         ProvideMenuState(state = state) {
@@ -99,21 +96,15 @@ fun Menu(
     }
 
     if (parentState == null) {
+        val coroutineScope: CoroutineScope = rememberCoroutineScope()
         val focusEventListener: FocusEventListener = remember { FocusEventListener(state) }
         var eventQueueJob: Job? by remember { mutableStateOf(null) }
-        val density: Density = LocalDensity.current
 
         DisposableEffect(state.initialized) {
             if (state.initialized) {
                 focusEventListener.register()
 
-                eventQueueJob = state.menuHoverActionState.debounce(100)
-                    .distinctUntilChanged()
-                    .filterNotNull()
-                    .onEach { target ->
-                        target.state.handleHoverTarget(target, density)
-                    }.flowOn(Dispatchers.Main)
-                    .launchIn(coroutineScope)
+                eventQueueJob = state.launchActionCoroutine(coroutineScope)
             }
 
             onDispose {

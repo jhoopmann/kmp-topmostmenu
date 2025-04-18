@@ -8,12 +8,12 @@ import java.awt.event.AWTEventListener
 import java.awt.event.FocusEvent
 
 internal class FocusEventListener(
-    private val topState: MenuState
+    private val menuState: MenuState
 ) : AWTEventListener {
     override fun eventDispatched(event: AWTEvent?) {
         if (event is FocusEvent && event.id == FocusEvent.FOCUS_LOST) {
-            if (!topState.anyVisibleInLocation(MouseInfo.getPointerInfo().location)) {        
-                topState.close()
+            if (!menuState.anyVisibleInLocation(MouseInfo.getPointerInfo().location)) {
+                menuState.emitClose()
             }
         }
     }

@@ -71,7 +71,7 @@ fun Menu(
             }
         },
         afterInitialization = { topMost, _ ->
-            if (parentState == null && state.allInitialized) {
+            if (parentState == null && state.initializedAll) {
                 topMost.setPlatformOptionsAfterInit(topMostOptions)
             }
 

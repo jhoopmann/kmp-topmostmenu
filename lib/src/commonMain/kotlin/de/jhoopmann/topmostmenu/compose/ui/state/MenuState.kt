@@ -54,8 +54,8 @@ class MenuState(
             composeWindowRef?.clear()
             composeWindowRef = WeakReference(value)
         }
-    internal val anyFocused: Boolean
-        get() = composeWindow.isFocused || children.any { it.anyFocused }
+    internal val focusedAny: Boolean
+        get() = composeWindow.isFocused || children.any { it.focusedAny }
     private val menuActionState: MutableStateFlow<MenuAction?> = MutableStateFlow(null)
 
     var size: DpSize
@@ -82,8 +82,8 @@ class MenuState(
         }
     var initialized: Boolean by mutableStateOf(false)
         internal set
-    val allInitialized: Boolean
-        get() = initialized && children.all { it.allInitialized }
+    val initializedAll: Boolean
+        get() = initialized && children.all { it.initializedAll }
     var isVisible: Boolean by mutableStateOf(false)
         private set
 

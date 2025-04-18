@@ -17,7 +17,7 @@ internal class FocusEventListener(
                 menuState.emitAction {
                     delay(16 * 2)
 
-                    if (!menuState.anyFocused) {
+                    if (!menuState.focusedAny) {
                         menuState.close()
                     }
                 }

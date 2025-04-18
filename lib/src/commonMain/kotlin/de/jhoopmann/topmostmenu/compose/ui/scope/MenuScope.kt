@@ -8,7 +8,7 @@ import de.jhoopmann.topmostmenu.compose.ui.MenuLayout
 import de.jhoopmann.topmostmenu.compose.ui.MenuModifiers
 import de.jhoopmann.topmostmenu.compose.ui.ClosedEvent
 
-data class MenuScope(
+data class MenuScope internal constructor(
     val initialPosition: WindowPosition,
     val initialSize: DpSize,
     val shape: Shape,

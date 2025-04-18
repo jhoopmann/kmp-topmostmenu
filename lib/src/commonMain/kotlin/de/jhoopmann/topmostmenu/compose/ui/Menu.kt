@@ -17,8 +17,6 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.internal.synchronized
 import kotlinx.coroutines.launch
-import java.lang.ref.PhantomReference
-import java.lang.ref.WeakReference
 
 @OptIn(ExperimentalComposeUiApi::class, InternalCoroutinesApi::class)
 @Composable

@@ -19,7 +19,10 @@ import kotlinx.coroutines.flow.*
 import java.awt.Desktop
 import java.awt.Dimension
 import java.awt.Point
+import java.awt.Window
 import java.lang.ref.WeakReference
+import de.jhoopmann.topmostmenu.native.platform
+import de.jhoopmann.topmostmenu.native.Platform
 
 class MenuState(
     position: WindowPosition = WindowPosition(Alignment.Center),
@@ -41,6 +44,13 @@ class MenuState(
         }
     internal val window: ComposeDialog
         get() = composeTopMostImpl.window
+    private var parentWindowRef: WeakReference<Window?>? = null
+    internal var parentWindow: Window?
+        get() = parentWindowRef?.get()
+        set(value) {
+            parentWindowRef?.clear()
+            parentWindowRef = WeakReference(value)
+        }
 
     internal val focusedAny: Boolean
         get() = window.isFocused || children.any { it.focusedAny }
@@ -132,11 +142,13 @@ class MenuState(
     }
 
     internal fun requestDesktopForeground() {
-        if (!Desktop.getDesktop().isSupported(Desktop.Action.APP_REQUEST_FOREGROUND)) {
-            throw RequestForegroundUnsupportedException()
-        }
+        if (platform == Platform.MacOS) {
+            if (!Desktop.getDesktop().isSupported(Desktop.Action.APP_REQUEST_FOREGROUND)) {
+                throw RequestForegroundUnsupportedException()
+            }
 
-        Desktop.getDesktop().requestForeground(true)
+            Desktop.getDesktop().requestForeground(true)
+        }
     }
 
     internal fun close(

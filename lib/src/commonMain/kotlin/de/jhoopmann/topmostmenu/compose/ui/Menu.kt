@@ -85,6 +85,7 @@ private fun Menu(
     val localWindow: Window? = remember { ComposeDialogHelper.getLocalWindow() }.current
 
     remember {
+        state.parentWindow = localWindow
         state.topState = parentState?.topState ?: state
         state.scope = MenuScope(
             initialPosition = when (val position: WindowPosition = state.position) {
@@ -104,8 +105,8 @@ private fun Menu(
 
     val topMostOptions: TopMostOptions = remember {
         TopMostOptions(
-            topMost = true,
-            sticky = true,
+            topMost = state.topState.parentWindow == null,
+            sticky = state.topState.parentWindow == null,
             skipTaskbar = true
         )
     }
@@ -120,7 +121,7 @@ private fun Menu(
         focusable = true,
         transparent = true,
         decoration = WindowDecoration.Undecorated(),
-        owner = localWindow?.takeIf { parentState == null },
+        owner = parentState?.window ?: localWindow,
         modalityType = Dialog.ModalityType.MODELESS,
         onPreviewKeyEvent = {
             state.handleKeyEvent(it)
@@ -160,22 +161,27 @@ private fun Menu(
         }
     } ?: run {
         val coroutineScope: CoroutineScope = rememberCoroutineScope()
-        val focusEventListener: FocusEventListener = remember { FocusEventListener(state) }
         var eventQueueJob: Job? by remember { mutableStateOf(null) }
 
         DisposableEffect(state.initializedAll) {
             if (state.initializedAll) {
-                focusEventListener.register()
-
                 eventQueueJob = state.launchActionCoroutine(coroutineScope)
             }
 
             onDispose {
                 if (eventQueueJob != null) {
-                    focusEventListener.unregister()
                     eventQueueJob?.cancel()
                     eventQueueJob = null
                 }
+            }
+        }
+
+        val focusEventListener: FocusEventListener = remember { FocusEventListener(state) }
+        DisposableEffect(Unit) {
+            focusEventListener.register()
+
+            onDispose {
+                focusEventListener.unregister()
             }
         }
     }

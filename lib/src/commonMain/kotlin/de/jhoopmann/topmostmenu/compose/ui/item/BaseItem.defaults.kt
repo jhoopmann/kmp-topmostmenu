@@ -17,7 +17,7 @@ val DefaultItemLayout: ItemLayout = { modifiers, prepend, append, center ->
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            ProvideItemScope(LocalItemScope.current?.apply { item = this@Row }) {
+            ProvideItemScope(LocalItemScope.current?.apply { item = this }) {
                 prepend {}
             }
         }
@@ -27,7 +27,7 @@ val DefaultItemLayout: ItemLayout = { modifiers, prepend, append, center ->
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
-            ProvideItemScope(LocalItemScope.current?.apply { item = this@Row }) {
+            ProvideItemScope(LocalItemScope.current?.apply { item = this }) {
                 center {}
             }
         }
@@ -37,7 +37,7 @@ val DefaultItemLayout: ItemLayout = { modifiers, prepend, append, center ->
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.End
         ) {
-            ProvideItemScope(LocalItemScope.current?.apply { item = this@Row }) {
+            ProvideItemScope(LocalItemScope.current?.apply { item = this }) {
                 append {}
             }
         }

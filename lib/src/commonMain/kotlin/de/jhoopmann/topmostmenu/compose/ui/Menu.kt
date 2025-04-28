@@ -144,7 +144,14 @@ private fun Menu(
             onInitialized?.invoke(state)
         },
         onCloseRequest = {
-            state.emitClose()
+            state.emitAction {
+                if (state != state.topState) {
+                    state.parentWindow?.toFront()
+                    state.parentWindow?.requestFocus()
+                }
+
+                state.close()
+            }
         },
         content = {
             layout.invoke(state, content)

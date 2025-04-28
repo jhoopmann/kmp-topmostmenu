@@ -91,11 +91,20 @@ class MenuState(
         position: WindowPosition = this.position,
         size: DpSize = this.size
     ) {
-        emitAction { open(position, size) }
+        emitAction {
+            requestDesktopForeground()
+
+            open(position, size)
+
+            window.toFront()
+            window.requestFocus()
+        }
     }
 
     fun emitClose(byAction: Boolean = false) {
-        emitAction { close(byAction) }
+        emitAction {
+            close(byAction)
+        }
     }
 
     fun handleKeyEvent(event: KeyEvent): Boolean {
@@ -125,14 +134,9 @@ class MenuState(
         this.position = position
         this.size = size
 
-        requestDesktopForeground()
-
         if (!composeTopMostImpl.isVisible) {
             composeTopMostImpl.isVisible = true
         }
-
-        window.toFront()
-        window.requestFocus()
 
         isVisible = true
     }

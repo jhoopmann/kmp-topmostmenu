@@ -3,11 +3,9 @@ package de.jhoopmann.topmostmenu.compose.ui
 import de.jhoopmann.topmostmenu.compose.ui.state.MenuState
 import kotlinx.coroutines.delay
 import java.awt.AWTEvent
-import java.awt.MouseInfo
 import java.awt.Toolkit
 import java.awt.event.AWTEventListener
 import java.awt.event.FocusEvent
-import java.awt.event.WindowEvent
 
 internal class FocusEventListener(
     private val menuState: MenuState
@@ -18,7 +16,9 @@ internal class FocusEventListener(
                 delay(16 * 4)
 
                 if (!menuState.topState.focusedAny) {
-                    menuState.topState.close()
+                    menuState.topState.emitAction {
+                        menuState.topState.close()
+                    }
                 }
             }
         }

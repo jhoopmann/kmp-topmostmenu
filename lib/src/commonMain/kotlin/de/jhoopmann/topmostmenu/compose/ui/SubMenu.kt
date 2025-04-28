@@ -64,6 +64,9 @@ fun MenuState.SubMenu(
 
             state.open(position = newPosition, size = newSize)
 
+            state.window.toFront()
+            state.window.requestFocus()
+
             topState.closeChildren(state)
         }
     })

@@ -121,7 +121,7 @@ private fun Menu(
         focusable = true,
         transparent = true,
         decoration = WindowDecoration.Undecorated(),
-        owner = parentState?.window ?: localWindow,
+        owner = state.topState.parentWindow,
         modalityType = Dialog.ModalityType.MODELESS,
         onPreviewKeyEvent = {
             state.handleKeyEvent(it)

@@ -175,14 +175,14 @@ private fun Menu(
                 }
             }
         }
+    }
 
-        val focusEventListener: FocusEventListener = remember { FocusEventListener(state) }
-        DisposableEffect(Unit) {
-            focusEventListener.register()
+    val focusEventListener: FocusEventListener = remember { FocusEventListener(state) }
+    DisposableEffect(Unit) {
+        focusEventListener.register()
 
-            onDispose {
-                focusEventListener.unregister()
-            }
+        onDispose {
+            focusEventListener.unregister()
         }
     }
 }

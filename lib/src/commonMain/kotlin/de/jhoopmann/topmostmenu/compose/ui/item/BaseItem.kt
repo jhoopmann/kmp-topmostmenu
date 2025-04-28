@@ -16,10 +16,13 @@ fun MenuState.BaseItem(
     layout(
         modifiers.apply {
             item = Modifier.onPointerEvent(PointerEventType.Enter, onEvent = { event ->
-                requestDesktopForeground()
-
                 if (!event.changes.first().isConsumed) {
-                    emitCloseChildren()
+                    emitAction {
+                        window.toFront()
+                        window.requestFocus()
+
+                        closeChildren()
+                    }
                 }
             }).then(item)
         },

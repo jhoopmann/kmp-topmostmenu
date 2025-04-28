@@ -98,10 +98,6 @@ class MenuState(
         emitAction { close(byAction) }
     }
 
-    fun emitCloseChildren() {
-        emitAction { closeChildren() }
-    }
-
     fun handleKeyEvent(event: KeyEvent): Boolean {
         return topState.keyEventListeners.any { it.invoke(event) } || children.any {
             it.handleKeyEvent(event)

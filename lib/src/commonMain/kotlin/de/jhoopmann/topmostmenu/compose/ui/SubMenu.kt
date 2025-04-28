@@ -51,8 +51,6 @@ fun MenuState.SubMenu(
                 return@emitAction
             }
 
-            topState.closeChildren(state)
-
             val newPosition: WindowPosition = state.position.takeIf {
                 state.scope.initialPosition is WindowPosition.Absolute
             } ?: state.calculatePosition(
@@ -65,6 +63,8 @@ fun MenuState.SubMenu(
                 ?: DpSize.Unspecified
 
             state.open(position = newPosition, size = newSize)
+
+            topState.closeChildren(state)
         }
     })
 }

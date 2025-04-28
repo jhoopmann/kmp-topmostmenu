@@ -162,7 +162,6 @@ private fun Menu(
     } ?: run {
         val coroutineScope: CoroutineScope = rememberCoroutineScope()
         var eventQueueJob: Job? by remember { mutableStateOf(null) }
-
         DisposableEffect(state.initializedAll) {
             if (state.initializedAll) {
                 eventQueueJob = state.launchActionCoroutine(coroutineScope)
@@ -175,14 +174,14 @@ private fun Menu(
                 }
             }
         }
-    }
 
-    val focusEventListener: FocusEventListener = remember { FocusEventListener(state) }
-    DisposableEffect(Unit) {
-        focusEventListener.register()
+        val focusEventListener: FocusEventListener = remember { FocusEventListener(state) }
+        DisposableEffect(Unit) {
+            focusEventListener.register()
 
-        onDispose {
-            focusEventListener.unregister()
+            onDispose {
+                focusEventListener.unregister()
+            }
         }
     }
 }

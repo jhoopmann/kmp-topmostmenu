@@ -1,6 +1,7 @@
 package de.jhoopmann.topmostmenu.compose.ui.item
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -13,16 +14,17 @@ fun MenuState.BaseItem(
     modifiers: ItemModifiers = defaultItemModifiers(),
     layout: ItemLayout = DefaultItemLayout
 ) {
+    val close: () -> Unit = remember {
+        {
+            closeChildren(focus = true)
+        }
+    }
+
     layout(
         modifiers.apply {
-            item = Modifier.onPointerEvent(PointerEventType.Enter, onEvent = { event ->
+            item = Modifier.onPointerEvent(PointerEventType.Move, onEvent = { event ->
                 if (!event.changes.first().isConsumed) {
-                    emitAction {
-                        window.toFront()
-                        window.requestFocus()
-
-                        closeChildren()
-                    }
+                    emitAction(close)
                 }
             }).then(item)
         },

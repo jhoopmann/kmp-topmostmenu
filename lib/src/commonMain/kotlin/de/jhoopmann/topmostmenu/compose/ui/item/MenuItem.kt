@@ -53,8 +53,9 @@ fun MenuState.MenuItem(
                 layoutCoordinates = it
                 onGloballyPositioned(it)
             }.clickable(enabled = true, onClick = { onEnter.invoke() })
-                .onPointerEvent(eventType = PointerEventType.Enter, onEvent = { event ->
-                    event.changes.first().consume()
+                .onPointerEvent(eventType = PointerEventType.Move, onEvent = { event ->
+                    event.changes.first().consume() // disable for BaseItem
+
                     onEnter.invoke()
                 })
         },

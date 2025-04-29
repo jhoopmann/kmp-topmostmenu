@@ -12,15 +12,16 @@ internal class FocusEventListener(
 ) : AWTEventListener {
     override fun eventDispatched(event: AWTEvent?) {
         if (event is FocusEvent && event.id == FocusEvent.FOCUS_LOST) {
-            menuState.emitAction {
-                delay(16 * 4)
-
-                if (!menuState.topState.focusedAny) {
-                    menuState.topState.emitAction {
-                        menuState.topState.close()
-                    }
-                }
-            }
+//            menuState.emitAction {
+//                delay(16 * 4)
+//
+//                if (!menuState.topState.focused) {
+//                    println("EMIT CLOSE BY EVENT")
+//                    menuState.topState.emitAction {
+//                        menuState.topState.close(focus = false, propagate = false)
+//                    }
+//                }
+//            }
         }
     }
 

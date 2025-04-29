@@ -85,7 +85,8 @@ private fun Menu(
     val localWindow: Window? = remember { ComposeDialogHelper.getLocalWindow() }.current
 
     remember {
-        state.parentWindow = localWindow
+        state.ownerWindow = parentState?.window ?: localWindow
+        state.parentState = parentState
         state.topState = parentState?.topState ?: state
         state.scope = MenuScope(
             initialPosition = when (val position: WindowPosition = state.position) {
@@ -105,8 +106,8 @@ private fun Menu(
 
     val topMostOptions: TopMostOptions = remember {
         TopMostOptions(
-            topMost = state.topState.parentWindow == null,
-            sticky = state.topState.parentWindow == null,
+            topMost = state.topState.ownerWindow == null,
+            sticky = state.topState.ownerWindow == null,
             skipTaskbar = true
         )
     }
@@ -121,7 +122,7 @@ private fun Menu(
         focusable = true,
         transparent = true,
         decoration = WindowDecoration.Undecorated(),
-        owner = state.topState.parentWindow,
+        owner = state.topState.ownerWindow,
         modalityType = Dialog.ModalityType.MODELESS,
         onPreviewKeyEvent = {
             state.handleKeyEvent(it)
@@ -145,12 +146,7 @@ private fun Menu(
         },
         onCloseRequest = {
             state.emitAction {
-                if (state != state.topState) {
-                    state.parentWindow?.toFront()
-                    state.parentWindow?.requestFocus()
-                }
-
-                state.close()
+                state.close(propagate = false, focus = false)
             }
         },
         content = {

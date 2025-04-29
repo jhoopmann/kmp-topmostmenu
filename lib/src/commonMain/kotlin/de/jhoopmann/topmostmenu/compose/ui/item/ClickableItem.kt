@@ -32,7 +32,9 @@ fun MenuState.ClickableItem(
                 if (scope.actionAutoClose) {
                     coroutineScope.launch {
                         delay(300)
-                        emitClose(true)
+                        emitAction {
+                            close(propagate = true, focus = false)
+                        }
                     }
                 }
             }

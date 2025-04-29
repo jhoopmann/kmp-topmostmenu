@@ -30,11 +30,11 @@ fun MenuState.SubMenu(
         state = state,
         shape = shape,
         actionAutoClose = autoClose,
-        onClosed = {
-            onClosed?.invoke(it)
+        onClosed = { propagate ->
+            onClosed?.invoke(propagate)
 
-            if (it) {
-                close(it)
+            if (propagate) {
+                close(propagate, focus = false)
             }
         },
         modifiers = modifiers,
@@ -43,16 +43,8 @@ fun MenuState.SubMenu(
         content = content
     )
 
-    menuItemLayout({
-        menuItemCoordinates = it
-    }, {
-        state.emitAction {
-            if (state.isVisible) {
-                state.closeChildren()
-
-                return@emitAction
-            }
-
+    val open: () -> Unit = remember {
+        {
             val newPosition: WindowPosition = state.position.takeIf {
                 state.scope.initialPosition is WindowPosition.Absolute
             } ?: state.calculatePosition(
@@ -64,12 +56,15 @@ fun MenuState.SubMenu(
             val newSize: DpSize = state.size.takeIf { state.scope.initialSize.isSpecified }
                 ?: DpSize.Unspecified
 
-            state.open(position = newPosition, size = newSize)
+            state.open(focus = true, position = newPosition, size = newSize)
 
-            state.window.toFront()
-            state.window.requestFocus()
-
-            topState.closeChildren(state)
+            topState.closeChildren(focus = false, except = state)
         }
+    }
+
+    menuItemLayout({
+        menuItemCoordinates = it
+    }, {
+        state.emitAction(open)
     })
 }

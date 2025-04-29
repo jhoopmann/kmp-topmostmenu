@@ -30,10 +30,10 @@ class MenuState(
 ) {
     lateinit var scope: MenuScope
         internal set
-    lateinit var topState: MenuState
-        internal set
-    internal val windowState: DialogState = DialogState(position = position, size = size)
+    internal lateinit var topState: MenuState
+    internal var parentState: MenuState? = null
     internal val children: MutableList<MenuState> = mutableListOf()
+    internal val windowState: DialogState = DialogState(position = position, size = size)
     internal val keyEventListeners: MutableList<KeyEventMatcher> = mutableListOf()
     private var composeTopMostImplRef: WeakReference<ComposeTopMostDialog>? = null
     internal var composeTopMostImpl: ComposeTopMostDialog
@@ -44,66 +44,44 @@ class MenuState(
         }
     internal val window: ComposeDialog
         get() = composeTopMostImpl.window
-    private var parentWindowRef: WeakReference<Window?>? = null
-    internal var parentWindow: Window?
-        get() = parentWindowRef?.get()
+    private var ownerWindowRef: WeakReference<Window?>? = null
+    internal var ownerWindow: Window?
+        get() = ownerWindowRef?.get()
         set(value) {
-            parentWindowRef?.clear()
-            parentWindowRef = WeakReference(value)
+            ownerWindowRef?.clear()
+            ownerWindowRef = value?.run { WeakReference(value) }
         }
+    val menuActionState: MutableStateFlow<MenuAction?> = MutableStateFlow(null)
 
-    internal val focusedAny: Boolean
-        get() = window.isFocused || children.any { it.focusedAny }
-    private val menuActionState: MutableStateFlow<MenuAction?> = MutableStateFlow(null)
-
-    var size: DpSize
-        get() = windowState.size
-        set(value) {
-            if (value.isSpecified && value != this.size) {
-                window.size = Dimension(value.width.value.toInt(), value.height.value.toInt())
-            } else if (value.isUnspecified) {
-                with(window) {
-                    contentPane.size = getPreferredRootSize().run {
-                        Dimension(width.value.toInt(), height.value.toInt())
-                    }
-                    rootPane.size = contentPane.size
-                    pack()
-                }
-            }
-        }
-    var position: WindowPosition
-        get() = windowState.position
-        set(value) {
-            if (value.isSpecified && value != this.position) {
-                window.location = with(value) {
-                    Point(x.value.toInt(), y.value.toInt())
-                }
-            }
-        }
     var initialized: Boolean by mutableStateOf(false)
         internal set
     val initializedAll: Boolean
         get() = initialized && children.all { it.initializedAll }
+    val focused: Boolean
+        get() = window.isFocused || children.any { it.focused }
     var isVisible: Boolean by mutableStateOf(false)
         private set
+
+    var size: DpSize
+        get() = windowState.size
+        set(value) = setWindowSize(value)
+    var position: WindowPosition
+        get() = windowState.position
+        set(value) = setWindowPosition(value)
+
 
     fun emitOpen(
         position: WindowPosition = this.position,
         size: DpSize = this.size
     ) {
         emitAction {
-            requestDesktopForeground()
-
-            open(position, size)
-
-            window.toFront()
-            window.requestFocus()
+            open(focus = true, position, size)
         }
     }
 
-    fun emitClose(byAction: Boolean = false) {
+    fun emitClose() {
         emitAction {
-            close(byAction)
+            close(propagate = false, focus = true)
         }
     }
 
@@ -113,49 +91,45 @@ class MenuState(
         }
     }
 
-    @OptIn(FlowPreview::class)
-    internal fun launchActionCoroutine(coroutineScope: CoroutineScope): Job {
-        return topState.menuActionState.debounce(16 * 2)
-            .distinctUntilChanged()
-            .filterNotNull()
-            .onEach { it.invoke() }
-            .flowOn(Dispatchers.Main)
-            .launchIn(coroutineScope)
-    }
-
     internal fun emitAction(action: MenuAction) {
         topState.menuActionState.value = action
     }
 
     internal fun open(
+        focus: Boolean,
         position: WindowPosition = this.position,
         size: DpSize = this.size
     ) {
-        this.position = position
-        this.size = size
+        setWindowPosition(position)
+        setWindowSize(size)
+
+        if (focus && !window.hasFocus()) { // mac os specific
+            requestDesktopForeground()
+        }
 
         if (!composeTopMostImpl.isVisible) {
             composeTopMostImpl.isVisible = true
         }
 
+        if (focus) {
+            requestFocus(window)
+        }
+
+        closeChildren(false, except = null)
+
         isVisible = true
     }
 
-    internal fun requestDesktopForeground() {
-        if (platform == Platform.MacOS) {
-            if (!Desktop.getDesktop().isSupported(Desktop.Action.APP_REQUEST_FOREGROUND)) {
-                throw RequestForegroundUnsupportedException()
-            }
-
-            Desktop.getDesktop().requestForeground(true)
-        }
-    }
-
     internal fun close(
-        byAction: Boolean = false,
-        except: MenuState? = null
+        propagate: Boolean,
+        focus: Boolean,
+        except: MenuState? = null,
     ) {
-        closeChildren(except)
+        if (focus) {
+            parentState?.window?.also { requestFocus(it) }
+        }
+
+        closeChildren(focus = false, except)
 
         if (except != null && (except == this || hasDeepChild(except))) {
             return
@@ -166,32 +140,71 @@ class MenuState(
         }
 
         isVisible = false
-        scope.onClosed?.invoke(byAction)
+        scope.onClosed?.invoke(propagate)
     }
 
-    internal fun closeChildren(except: MenuState? = null) {
-        children.forEach {
-            it.close(false, except)
+    internal fun closeChildren(focus: Boolean, except: MenuState? = null) {
+        if (focus) {
+            requestFocus(window)
         }
-    }
 
-    internal fun anyVisibleInLocation(location: Point): Boolean {
-        return visibleInLocation(location) ||
-                children.any { it.anyVisibleInLocation(location) }
+        children.forEach {
+            it.close(propagate = false, focus = false, except)
+        }
     }
 
     private fun hasDeepChild(state: MenuState): Boolean {
         return (children.any { it == state } || children.any { it.hasDeepChild(state) })
     }
 
-    private fun visibleInLocation(location: Point): Boolean {
-        return isVisible && with(position) {
-            val size: DpSize = windowState.size
-            val xMax: Float = x.value + size.width.value
-            val yMax: Float = y.value + size.height.value
+    @OptIn(FlowPreview::class)
+    internal fun launchActionCoroutine(coroutineScope: CoroutineScope): Job {
+        return topState.menuActionState.debounce(16 * 2)
+            .distinctUntilChanged()
+            .filterNotNull()
+            .onEach {
+                it.invoke()
+            }
+            .flowOn(Dispatchers.Main)
+            .launchIn(coroutineScope)
+    }
 
-            (location.x >= x.value && location.x <= xMax) &&
-                    (location.y >= y.value && location.y <= yMax)
+    private fun setWindowSize(value: DpSize) {
+        if (value.isSpecified && value != this.size) {
+            window.size = Dimension(value.width.value.toInt(), value.height.value.toInt())
+        } else if (value.isUnspecified) {
+            with(window) {
+                contentPane.size = getPreferredRootSize().run {
+                    Dimension(width.value.toInt(), height.value.toInt())
+                }
+                rootPane.size = contentPane.size
+                pack()
+            }
+        }
+    }
+
+    private fun setWindowPosition(value: WindowPosition) {
+        if (value.isSpecified && value != this.position) {
+            window.location = with(value) {
+                Point(x.value.toInt(), y.value.toInt())
+            }
+        }
+    }
+
+    private fun requestFocus(window: Window) {
+        window.takeUnless { it.hasFocus() }?.run {
+            toFront()
+            requestFocus()
+        }
+    }
+
+    private fun requestDesktopForeground() {
+        if (platform == Platform.MacOS) {
+            if (!Desktop.getDesktop().isSupported(Desktop.Action.APP_REQUEST_FOREGROUND)) {
+                throw RequestForegroundUnsupportedException()
+            }
+
+            Desktop.getDesktop().requestForeground(true)
         }
     }
 }

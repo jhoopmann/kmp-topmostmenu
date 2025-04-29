@@ -11,5 +11,5 @@ class MenuModifiers(
 
 typealias MenuLayout = @Composable MenuState.(MenuContent) -> Unit
 typealias MenuContent = @Composable MenuState.() -> Unit
-typealias ClosedEvent = (action: Boolean) -> Unit
+typealias ClosedEvent = (propagate: Boolean) -> Unit
 typealias MenuInitializedEvent = (MenuState) -> Unit

@@ -48,6 +48,8 @@ fun MenuState.SubMenu(
     }, {
         state.emitAction {
             if (state.isVisible) {
+                state.closeChildren()
+
                 return@emitAction
             }
 

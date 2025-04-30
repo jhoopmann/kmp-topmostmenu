@@ -45,6 +45,10 @@ fun MenuState.SubMenu(
 
     val open: () -> Unit = remember {
         {
+            if (state.isVisible) {
+                state.closeChildren(focus = state.window)
+            }
+
             val newPosition: WindowPosition = state.position.takeIf {
                 state.scope.initialPosition is WindowPosition.Absolute
             } ?: state.calculatePosition(
@@ -65,7 +69,7 @@ fun MenuState.SubMenu(
     menuItemLayout({
         menuItemCoordinates = it
     }, {
-        if (isVisible && !state.isVisible) {
+        if (isVisible) {
             state.emitAction(open)
         }
     })

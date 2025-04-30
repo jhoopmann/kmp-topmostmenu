@@ -3,7 +3,7 @@
 ## Introduction [1.2.1]
 
 Full customizable menu for usage as in-app context menu or tray icon for example.
-Uses ```kmp-compose-stickywindow``` and ```kmp-stickywindow``` to be able to be displayed sticky (also on foreign fullscreen spaces on macOS).
+Uses ```kmp-compose-stickywindow``` and ```kmp-stickywindow``` to be able to be displayed sticky (also on foreign fullscreen spaces on macOS). Autoclose on focus lost.
 
 ![Menu on desktop space](/doc/img/desktop-space.png)
 ![Menu on foreign fullscreen spaces.](/doc/img/fullscreen-space.png)

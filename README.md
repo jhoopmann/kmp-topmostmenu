@@ -1,11 +1,9 @@
 # Kotlin Multiplatform Compose Menu Library
 
-## Introduction
-
-(UNDER DEVELOPMENT, release expected to be ready after 20th April 2025)
+## Introduction [1.2.1]
 
 Full customizable menu for usage as in-app context menu or tray icon for example.
-Uses kmp-compose-stickywindow to be able to be displayed on foreign fullscreen spaces on macOS.
+Uses ```kmp-compose-stickywindow``` and ```kmp-stickywindow``` to be able to be displayed sticky (also on foreign fullscreen spaces on macOS).
 
 ![Menu on desktop space](/doc/img/desktop-space.png)
 ![Menu on foreign fullscreen spaces.](/doc/img/fullscreen-space.png)
@@ -24,7 +22,7 @@ Tested with
 ## Usage
 
 ```
-val menuState: MenuState = rememberMenuState()
+val menuState: MenuState = rememberMenuWindowState()
 
 Menu(
     menuState = menuState,
@@ -62,6 +60,7 @@ Menu(
 
     /* Sub Menues */
     SubMenu(
+        state = rememberMenuWindowState(),
         menuItemLayout = { onGloballyPositioned, onEnter ->
             MenuItem(
                 text = "Services",
@@ -77,7 +76,13 @@ Menu(
         }
     ) {
             TextItem(text = "Text")
-            ...
+
+            SubMenu(
+                state = rememberMenuWindowState(),
+                menuItemLayout = { onGloballyPositioned, onEnter ->
+                   ...
+                }
+            ) { ... }
     }
 
 
@@ -158,7 +163,7 @@ fun CustomItem(customText: Text, layout: ItemLayout = { modifiers, prepend, appe
 }
 ```
 
-Emit menu action to close or open. Actions are debounced (32ms) collected an.
+Emit menu action to close or open. Actions are debounced (32ms) collected in composable coroutine scope on the main dispatcher.
 
 ```
 menuState.emitOpen()

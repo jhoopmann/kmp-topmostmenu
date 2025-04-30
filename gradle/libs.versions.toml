@@ -16,5 +16,5 @@ jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose-plugi
 [libraries]
 #androidx-lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
-topmostwindow = { group = "de.jhoopmann.topmostwindow.awt", name = "kmp-topmostwindow", version.ref="topmostwindow"}
-compose-topmostwindow = { group = "de.jhoopmann.topmostwindow.compose", name = "kmp-compose-topmostwindow", version.ref="topmostwindow"}
+topmostwindow = { group = "de.jhoopmann.stickywindow.awt", name = "kmp-stickywindow", version.ref="topmostwindow"}
+compose-stickywindow = { group = "de.jhoopmann.stickywindow.compose", name = "kmp-compose-stickywindow", version.ref="topmostwindow"}

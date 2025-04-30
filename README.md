@@ -5,7 +5,7 @@
 (UNDER DEVELOPMENT, release expected to be ready after 20th April 2025)
 
 Full customizable menu for usage as in-app context menu or tray icon for example.
-Uses kmp-compose-topmostwindow to be able to be displayed on foreign fullscreen spaces on macOS.
+Uses kmp-compose-stickywindow to be able to be displayed on foreign fullscreen spaces on macOS.
 
 ![Menu on desktop space](/doc/img/desktop-space.png)
 ![Menu on foreign fullscreen spaces.](/doc/img/fullscreen-space.png)

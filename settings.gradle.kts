@@ -6,7 +6,7 @@
  * This project uses @Incubating APIs which are subject to change.
  */
 
-rootProject.name = "kmp-compose-topmostmenu"
+rootProject.name = "kmp-compose-menukit"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
@@ -24,7 +24,7 @@ dependencyResolutionManagement {
 
 //        maven {
 //            name = "KmpTopmostWindowGithub"
-//            url = uri("https://maven.pkg.github.com/jhoopmann/kmp-topmostwindow")
+//            url = uri("https://maven.pkg.github.com/jhoopmann/kmp-stickywindow")
 //            credentials {
 //                username = System.getenv("GITHUB_ACTOR")
 //                password = System.getenv("GITHUB_TOKEN")
@@ -32,7 +32,7 @@ dependencyResolutionManagement {
 //        }
 //        maven {
 //            name = "KmpComposeTopmostWindowGithub"
-//            url = uri("https://maven.pkg.github.com/jhoopmann/kmp-compose-topmostwindow")
+//            url = uri("https://maven.pkg.github.com/jhoopmann/kmp-compose-stickywindow")
 //            credentials {
 //                username = System.getenv("GITHUB_ACTOR")
 //                password = System.getenv("GITHUB_TOKEN")
@@ -41,7 +41,7 @@ dependencyResolutionManagement {
 
         maven {
             name ="GithubKmpComposeTopMostMenu"
-            url = uri("https://maven.pkg.github.com/jhoopmann/kmp-topmostmenu")
+            url = uri("https://maven.pkg.github.com/jhoopmann/kmp-menukit")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")

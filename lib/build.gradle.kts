@@ -34,6 +34,23 @@ publishing {
             }
         }
     }
+
+    publications {
+        create<MavenPublication>("targetJvmPlatform") {
+            groupId = "de.jhoopmann.menukit.compose"
+            artifactId = "kmp-compose-menukit-$targetJvmPlatform"
+            version = project.version.toString()
+
+            afterEvaluate {
+                artifact(tasks.getByName("${targetJvmPlatform}Jar")) {
+                    classifier = null
+                }
+                artifact(tasks.getByName("allMetadataJar")) {
+                    classifier = "metadata"
+                }
+            }
+        }
+    }
 }
 
 kotlin {

@@ -69,9 +69,9 @@ Menu(
                 onEnter = onEnter
             )
         },
-        layout = { state, content ->
+        layout = {
             AnotherAppTheme {
-                DefaultMenuWindowLayout(state, content)
+                DefaultMenuWindowLayout(it)
             }
         }
     ) {
@@ -107,7 +107,7 @@ Example:
 
 ```
 @Composable
-fun CustomImageItem() {
+fun MenuState.CustomImageItem() {
     BaseItem(modifiers = ItemModifiers()) { modifiers, prepend, append, center ->
         Row(modifier = modifiers.item.padding(20.dp), horizontalArrangement = Arrangement.Center) {
             Column {
@@ -122,7 +122,7 @@ fun CustomImageItem() {
 Or declare your own ItemLayout, default is Row->Row
 ```
 @Composable
-fun CustomItem(customText: Text, layout: ItemLayout = { modifiers, prepend, append, content ->
+fun MenuState.CustomItem(customText: Text, layout: ItemLayout = { modifiers, prepend, append, content ->
         Column(modifier = modifiers.item) {
             Row(modifiers.contents.prepend.wrapContentHeight()) {
                 ProvideLayoutScope(LocalLayoutScope.current?.apply { item = this@Column }) {

@@ -14,7 +14,7 @@ val supportedJavaVersion: String = if (JavaVersion.current().toString().toInt() 
 } else JavaVersion.current().toString()
 
 group = "de.jhoopmann.menukit.compose"
-version = "1.2.0"
+version = "1.2.1"
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)

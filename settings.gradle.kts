@@ -22,26 +22,26 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
 
-//        maven {
-//            name = "KmpTopmostWindowGithub"
-//            url = uri("https://maven.pkg.github.com/jhoopmann/kmp-stickywindow")
-//            credentials {
-//                username = System.getenv("GITHUB_ACTOR")
-//                password = System.getenv("GITHUB_TOKEN")
-//            }
-//        }
-//        maven {
-//            name = "KmpComposeTopmostWindowGithub"
-//            url = uri("https://maven.pkg.github.com/jhoopmann/kmp-compose-stickywindow")
-//            credentials {
-//                username = System.getenv("GITHUB_ACTOR")
-//                password = System.getenv("GITHUB_TOKEN")
-//            }
-//        }
+        maven {
+            name = "KmpTopmostWindowGithub"
+            url = uri("https://maven.pkg.github.com/jhoopmann/kmp-stickywindow")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+        maven {
+            name = "KmpComposeTopmostWindowGithub"
+            url = uri("https://maven.pkg.github.com/jhoopmann/kmp-compose-stickywindow")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
 
         maven {
-            name ="GithubKmpComposeTopMostMenu"
-            url = uri("https://maven.pkg.github.com/jhoopmann/kmp-menukit")
+            name ="GithubKmpComposeMenuKit"
+            url = uri("https://maven.pkg.github.com/jhoopmann/kmp-compose-menukit")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")
@@ -51,5 +51,3 @@ dependencyResolutionManagement {
 }
 
 include(":lib")
-includeBuild("../kmp-topmostwindow")
-includeBuild("../kmp-compose-topmostwindow")

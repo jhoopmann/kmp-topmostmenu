@@ -41,7 +41,7 @@ jobs:
               run: chmod +x gradlew
 
             - name: Publish Package
-              run: ./gradlew publishTargetJvmPlatformPublicationToGithubKmpComposeTopMostMenuRepository -PtargetJvmPlatform=${{ matrix.target_jvm_platform }}
+              run: ./gradlew publishTargetJvmPlatformPublicationToGithubKmpComposeMenuKitRepository -PtargetJvmPlatform=${{ matrix.target_jvm_platform }}
               env:
                   GITHUB_ACTOR: ${{ github.actor }}
                   GITHUB_TOKEN: ${{ secrets.PUBLISHING_TOKEN }}

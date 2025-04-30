@@ -5,7 +5,7 @@
 kotlin = "2.1.10"
 androidx-lifecycle = "2.8.0"
 compose-plugin = "1.7.3"
-topmostwindow = "1.2.0"
+stickywindow = "1.2.0"
 
 [plugins]
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -16,5 +16,5 @@ jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose-plugi
 [libraries]
 #androidx-lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
-topmostwindow = { group = "de.jhoopmann.stickywindow.awt", name = "kmp-stickywindow", version.ref="topmostwindow"}
-compose-stickywindow = { group = "de.jhoopmann.stickywindow.compose", name = "kmp-compose-stickywindow", version.ref="topmostwindow"}
+stickywindow = { group = "de.jhoopmann.stickywindow.awt", name = "kmp-stickywindow", version.ref= "stickywindow" }
+compose-stickywindow = { group = "de.jhoopmann.stickywindow.compose", name = "kmp-compose-stickywindow", version.ref= "stickywindow" }

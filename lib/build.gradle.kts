@@ -13,7 +13,7 @@ val supportedJavaVersion: String = if (JavaVersion.current().toString().toInt() 
     JavaVersion.VERSION_17.toString()
 } else JavaVersion.current().toString()
 
-group = "de.jhoopmann.menukit"
+group = "de.jhoopmann.menukit.compose"
 version = "1.2.0"
 
 plugins {
@@ -39,15 +39,12 @@ kotlin {
 
                 implementation(libs.androidx.lifecycle.runtime.compose)
 
-                implementation("de.jhoopmann.stickywindow.awt:lib")
-                implementation("de.jhoopmann.stickywindow.compose:lib")
-
-//                libs.stickywindow.get().let { tmw ->
-//                    implementation("${tmw.group}:${tmw.name}-${targetJvmPlatform}:${tmw.version}")
-//                }
-//                libs.compose.stickywindow.get().let { tmw ->
-//                    implementation("${tmw.group}:${tmw.name}-${targetJvmPlatform}:${tmw.version}")
-//                }
+                libs.stickywindow.get().let { tmw ->
+                    implementation("${tmw.group}:${tmw.name}-${targetJvmPlatform}:${tmw.version}")
+                }
+                libs.compose.stickywindow.get().let { tmw ->
+                    implementation("${tmw.group}:${tmw.name}-${targetJvmPlatform}:${tmw.version}")
+                }
             }
         }
 

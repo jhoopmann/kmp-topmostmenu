@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.window.WindowDecoration
 import androidx.compose.ui.window.WindowPosition
 import de.jhoopmann.topmostmenu.compose.ui.scope.MenuScope
@@ -82,11 +81,7 @@ private fun Menu(
     parentState: MenuState?,
     state: MenuState
 ) {
-    val localWindow: Window? = remember { ComposeDialogHelper.getLocalWindow() }.current
-
     remember {
-        state.ownerWindow = parentState?.window ?: localWindow
-        state.parentState = parentState
         state.topState = parentState?.topState ?: state
         state.scope = MenuScope(
             initialPosition = when (val position: WindowPosition = state.position) {
@@ -104,10 +99,12 @@ private fun Menu(
         )
     }
 
+    val owner: Window? = ComposeDialogHelper.getLocalWindow().current.takeIf { parentState == null }
+        ?: parentState?.topState?.window?.owner
     val topMostOptions: TopMostOptions = remember {
         TopMostOptions(
-            topMost = state.topState.ownerWindow == null,
-            sticky = state.topState.ownerWindow == null,
+            topMost = owner == null,
+            sticky = owner == null,
             skipTaskbar = true
         )
     }
@@ -122,7 +119,7 @@ private fun Menu(
         focusable = true,
         transparent = true,
         decoration = WindowDecoration.Undecorated(),
-        owner = state.topState.ownerWindow,
+        owner = owner,
         modalityType = Dialog.ModalityType.MODELESS,
         onPreviewKeyEvent = {
             state.handleKeyEvent(it)
@@ -146,7 +143,7 @@ private fun Menu(
         },
         onCloseRequest = {
             state.emitAction {
-                state.close(propagate = false, focus = false)
+                state.close(propagate = false, focus = parentState?.window ?: state.window.owner)
             }
         },
         content = {
@@ -164,20 +161,23 @@ private fun Menu(
         }
     } ?: run {
         val coroutineScope: CoroutineScope = rememberCoroutineScope()
-        var eventQueueJob: Job? by remember { mutableStateOf(null) }
-        val focusEventListener: FocusEventListener = remember { FocusEventListener(state) }
+        var actionsJob: Job? by remember { mutableStateOf(null) }
+        var focusEventsJob: Job? by remember { mutableStateOf(null) }
+        val focusEventListener: FocusEventListener = remember { FocusEventListener() }
 
-        DisposableEffect(state.initializedAll) {
+        DisposableEffect(state.initializedAll, state) {
             if (state.initializedAll) {
                 focusEventListener.register()
-                eventQueueJob = state.launchActionCoroutine(coroutineScope)
+                focusEventsJob = focusEventListener.launchEventsCoroutine(state, coroutineScope)
+                actionsJob = state.launchActionCoroutine(coroutineScope)
             }
 
             onDispose {
-                if (eventQueueJob != null) {
-                    eventQueueJob?.cancel()
-                    eventQueueJob = null
+                if (actionsJob != null) {
                     focusEventListener.unregister()
+                    actionsJob?.cancel()
+                    focusEventsJob?.cancel()
+                    actionsJob = null
                 }
             }
         }

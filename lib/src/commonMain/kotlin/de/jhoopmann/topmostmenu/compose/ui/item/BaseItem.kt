@@ -16,14 +16,14 @@ fun MenuState.BaseItem(
 ) {
     val close: () -> Unit = remember {
         {
-            closeChildren(focus = true)
+            closeChildren(focus = window)
         }
     }
 
     layout(
         modifiers.apply {
             item = Modifier.onPointerEvent(PointerEventType.Move, onEvent = { event ->
-                if (!event.changes.first().isConsumed) {
+                if (!event.changes.first().isConsumed && isVisible) {
                     emitAction(close)
                 }
             }).then(item)

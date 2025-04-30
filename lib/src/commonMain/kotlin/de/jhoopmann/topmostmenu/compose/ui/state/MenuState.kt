@@ -3,35 +3,35 @@ package de.jhoopmann.topmostmenu.compose.ui.state
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.awt.ComposeDialog
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.isSpecified
-import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.window.DialogState
 import androidx.compose.ui.window.WindowPosition
 import de.jhoopmann.topmostmenu.compose.ui.item.KeyEventMatcher
 import de.jhoopmann.topmostmenu.compose.ui.scope.MenuScope
+import de.jhoopmann.topmostmenu.native.Platform
+import de.jhoopmann.topmostmenu.native.platform
 import de.jhoopmann.topmostwindow.compose.ui.awt.ComposeTopMostDialog
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import java.awt.Desktop
 import java.awt.Dimension
 import java.awt.Point
 import java.awt.Window
 import java.lang.ref.WeakReference
-import de.jhoopmann.topmostmenu.native.platform
-import de.jhoopmann.topmostmenu.native.Platform
 
 class MenuState(
-    position: WindowPosition = WindowPosition(Alignment.Center),
+    position: WindowPosition = WindowPosition.PlatformDefault,
     size: DpSize = DpSize.Unspecified
 ) {
     lateinit var scope: MenuScope
         internal set
     internal lateinit var topState: MenuState
-    internal var parentState: MenuState? = null
     internal val children: MutableList<MenuState> = mutableListOf()
     internal val windowState: DialogState = DialogState(position = position, size = size)
     internal val keyEventListeners: MutableList<KeyEventMatcher> = mutableListOf()
@@ -44,15 +44,8 @@ class MenuState(
         }
     internal val window: ComposeDialog
         get() = composeTopMostImpl.window
-    private var ownerWindowRef: WeakReference<Window?>? = null
-    internal var ownerWindow: Window?
-        get() = ownerWindowRef?.get()
-        set(value) {
-            ownerWindowRef?.clear()
-            ownerWindowRef = value?.run { WeakReference(value) }
-        }
-    val menuActionState: MutableStateFlow<MenuAction?> = MutableStateFlow(null)
 
+    val menuActionState: MutableStateFlow<MenuAction?> = MutableStateFlow(null)
     var initialized: Boolean by mutableStateOf(false)
         internal set
     val initializedAll: Boolean
@@ -64,10 +57,10 @@ class MenuState(
 
     var size: DpSize
         get() = windowState.size
-        set(value) = setWindowSize(value)
+        private set(value) = setWindowSize(value)
     var position: WindowPosition
         get() = windowState.position
-        set(value) = setWindowPosition(value)
+        private set(value) = setWindowPosition(value)
 
 
     fun emitOpen(
@@ -75,13 +68,13 @@ class MenuState(
         size: DpSize = this.size
     ) {
         emitAction {
-            open(focus = true, position, size)
+            open(focus = window, position = position, size = size)
         }
     }
 
     fun emitClose() {
         emitAction {
-            close(propagate = false, focus = true)
+            close(propagate = false, focus = null)
         }
     }
 
@@ -96,40 +89,34 @@ class MenuState(
     }
 
     internal fun open(
-        focus: Boolean,
         position: WindowPosition = this.position,
-        size: DpSize = this.size
+        size: DpSize = this.size,
+        focus: Window? = window
     ) {
         setWindowPosition(position)
         setWindowSize(size)
 
-        if (focus && !window.hasFocus()) { // mac os specific
-            requestDesktopForeground()
-        }
+        requestDesktopForeground()
 
         if (!composeTopMostImpl.isVisible) {
             composeTopMostImpl.isVisible = true
         }
 
-        if (focus) {
-            requestFocus(window)
-        }
+        focus?.toFrontRequestFocus()
 
-        closeChildren(false, except = null)
+        closeChildren(null, except = null)
 
         isVisible = true
     }
 
     internal fun close(
         propagate: Boolean,
-        focus: Boolean,
+        focus: Window? = null,
         except: MenuState? = null,
     ) {
-        if (focus) {
-            parentState?.window?.also { requestFocus(it) }
-        }
+        focus?.toFrontRequestFocus()
 
-        closeChildren(focus = false, except)
+        closeChildren(focus = focus, except)
 
         if (except != null && (except == this || hasDeepChild(except))) {
             return
@@ -143,13 +130,11 @@ class MenuState(
         scope.onClosed?.invoke(propagate)
     }
 
-    internal fun closeChildren(focus: Boolean, except: MenuState? = null) {
-        if (focus) {
-            requestFocus(window)
-        }
+    internal fun closeChildren(focus: Window? = window, except: MenuState? = null) {
+        focus?.toFront()
 
         children.forEach {
-            it.close(propagate = false, focus = false, except)
+            it.close(propagate = false, focus = window, except)
         }
     }
 
@@ -164,37 +149,35 @@ class MenuState(
             .filterNotNull()
             .onEach {
                 it.invoke()
-            }
-            .flowOn(Dispatchers.Main)
+            }.flowOn(Dispatchers.Main)
             .launchIn(coroutineScope)
     }
 
     private fun setWindowSize(value: DpSize) {
-        if (value.isSpecified && value != this.size) {
-            window.size = Dimension(value.width.value.toInt(), value.height.value.toInt())
-        } else if (value.isUnspecified) {
-            with(window) {
-                contentPane.size = getPreferredRootSize().run {
-                    Dimension(width.value.toInt(), height.value.toInt())
+        value.takeIf { it != size }?.also {
+            if (value.isSpecified) {
+                window.size = Dimension(value.width.value.toInt(), value.height.value.toInt())
+            } else {
+                with(window) {
+                    contentPane.size = getPreferredRootSize().run {
+                        Dimension(width.value.toInt(), height.value.toInt())
+                    }
+                    rootPane.size = contentPane.size
+                    pack()
                 }
-                rootPane.size = contentPane.size
-                pack()
             }
         }
     }
 
     private fun setWindowPosition(value: WindowPosition) {
-        if (value.isSpecified && value != this.position) {
-            window.location = with(value) {
-                Point(x.value.toInt(), y.value.toInt())
+        value.takeIf { it != position }?.also {
+            if (it.isSpecified) {
+                window.location = with(value) {
+                    Point(x.value.toInt(), y.value.toInt())
+                }
+            } else {
+                windowState.position = value
             }
-        }
-    }
-
-    private fun requestFocus(window: Window) {
-        window.takeUnless { it.hasFocus() }?.run {
-            toFront()
-            requestFocus()
         }
     }
 
@@ -205,6 +188,13 @@ class MenuState(
             }
 
             Desktop.getDesktop().requestForeground(true)
+        }
+    }
+
+    private fun Window.toFrontRequestFocus() {
+        takeUnless { it.hasFocus() }?.run {
+            toFront()
+            requestFocus()
         }
     }
 }

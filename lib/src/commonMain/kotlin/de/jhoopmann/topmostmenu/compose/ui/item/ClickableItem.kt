@@ -2,8 +2,10 @@ package de.jhoopmann.topmostmenu.compose.ui.item
 
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.text.TextStyle
 import de.jhoopmann.topmostmenu.compose.ui.state.MenuState
 import kotlinx.coroutines.CoroutineScope
@@ -33,7 +35,7 @@ fun MenuState.ClickableItem(
                     coroutineScope.launch {
                         delay(300)
                         emitAction {
-                            close(propagate = true, focus = false)
+                            close(propagate = true, focus = null)
                         }
                     }
                 }
@@ -43,10 +45,19 @@ fun MenuState.ClickableItem(
         }
     }
 
-    remember {
+    val keyEventListener: KeyEventMatcher = remember {
+        {
+            keyEventMatcher!!.invoke(it) && onClickWithClose.invoke()
+        }
+    }
+    DisposableEffect(Unit) {
         keyEventMatcher?.run {
-            keyEventListeners.add { event ->
-                invoke(event) && onClickWithClose.invoke()
+            keyEventListeners.add(keyEventListener)
+        }
+
+        onDispose {
+            keyEventMatcher?.run {
+                keyEventListeners.remove(keyEventListener)
             }
         }
     }

@@ -131,7 +131,7 @@ class MenuState(
     }
 
     internal fun closeChildren(focus: Window? = window, except: MenuState? = null) {
-        focus?.toFront()
+        focus?.toFrontRequestFocus()
 
         children.forEach {
             it.close(propagate = false, focus = window, except)

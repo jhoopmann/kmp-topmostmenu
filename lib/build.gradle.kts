@@ -20,6 +20,20 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.jetbrains.compose)
+    id("maven-publish")
+}
+
+publishing {
+    repositories {
+        maven {
+            name ="GithubKmpComposeMenuKit"
+            url = uri("https://maven.pkg.github.com/jhoopmann/kmp-compose-menukit")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
 }
 
 kotlin {

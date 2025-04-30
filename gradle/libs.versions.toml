@@ -18,3 +18,4 @@ jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose-plugi
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 stickywindow = { group = "de.jhoopmann.stickywindow.awt", name = "kmp-stickywindow", version.ref= "stickywindow" }
 compose-stickywindow = { group = "de.jhoopmann.stickywindow.compose", name = "kmp-compose-stickywindow", version.ref= "stickywindow" }
+compose-menukit = { group = "de.jhoopmann.menukit.compose", name = "kmp-compose-menukit", version.ref= "stickywindow" }

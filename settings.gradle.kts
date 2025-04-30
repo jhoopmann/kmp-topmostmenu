@@ -38,15 +38,6 @@ dependencyResolutionManagement {
                 password = System.getenv("GITHUB_TOKEN")
             }
         }
-
-        maven {
-            name ="GithubKmpComposeMenuKit"
-            url = uri("https://maven.pkg.github.com/jhoopmann/kmp-compose-menukit")
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
-            }
-        }
     }
 }
 
